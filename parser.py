@@ -1,5 +1,4 @@
-import os
-from cv2 import imread, imshow
+from cv2 import imread
 class Parser:
 	def __init__(self, folder: str, template: str, frame_range: tuple[int, int]) -> None:
 		self.start, self.end = frame_range

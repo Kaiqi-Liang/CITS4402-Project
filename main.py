@@ -1,4 +1,4 @@
-from parse import Parser
-parser = Parser('mot/car/001', '{:06}.jpg', (1, 3))
-print(parser.get_frame_range())
-print(parser.load_frame(1))
+from parser import Parser
+from detection import candidate_small_objects_detection
+parser = Parser('mot/car/001', '{:06}.jpg', (1, 4))
+candidate_small_objects_detection(2, parser)
