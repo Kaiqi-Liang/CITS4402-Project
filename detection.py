@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import cv2
 from parser import Parser
 
-def candidate_small_objects_detection(parser: Parser):
+def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 	start, end = parser.get_frame_range()
 	res = []
 	for n in range(start + 1, end - 1):
@@ -35,7 +35,7 @@ def candidate_small_objects_detection(parser: Parser):
 		# plt.show()
 
 		#(3) Candidate Extractions: Logical AND 
-		thresh_and = np.logical_and(thresh_img_12,thresh_img_23) * 255
+		thresh_and = np.logical_and(thresh_img_12, thresh_img_23) * 255
 		res.append(thresh_and)
 
 		# plt.imshow(thresh_and, cmap='gray')

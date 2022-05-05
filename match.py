@@ -3,8 +3,9 @@ import cv2
 import scipy as sp 
 import numpy as np
 import skimage
-def candidate_match_discrimination(parser: Parser, candidate_small_objects):
+def candidate_match_discrimination(parser: Parser, candidate_small_objects: list[np.ndarray]):
 	for object in candidate_small_objects:
-		label_image = skimage.measure.label(object)
-		image = skimage.measure.regionprops(label_image)
-		print(image)
+		labelled_image = skimage.measure.label(object)
+		properties = skimage.measure.regionprops(labelled_image)
+		for property in properties:
+			print(property.centroid)
