@@ -9,7 +9,7 @@ from parser import Parser
 def candidate_small_objects_detection(parser: Parser):
 	start, end = parser.get_frame_range()
 	res = []
-	for n in range(start + 1, end):
+	for n in range(start + 1, end - 1):
 		img1 = parser.load_frame(n - 1)
 		img2 = parser.load_frame(n)
 		img3 = parser.load_frame(n + 1)
