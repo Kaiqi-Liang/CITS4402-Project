@@ -8,4 +8,8 @@ def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):
 		labelled_image = skimage.measure.label(object)
 		properties = skimage.measure.regionprops(labelled_image)
 		for property in properties:
-			print(property.centroid)
+			row, col = property.centroid
+			row = round(row)
+			col = round(col)
+			window = object[max(row - 5, 0):row + 5, max(col - 5, 0):col + 5]
+			print(window)
