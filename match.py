@@ -11,5 +11,12 @@ def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):
 			row, col = property.centroid
 			row = round(row)
 			col = round(col)
-			window = object[max(row - 5, 0):row + 5, max(col - 5, 0):col + 5]
-			print(window)
+			window = object[max(row - 5, 0):min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)]
+			window_mean = np.average(window)
+			window_std = np.std(window)
+			upper_th = sp.stats.norm.ppf(0.995, loc=window_mean, scale=window_std)
+			lower_th = sp.stats.norm.ppf(0.005, loc=window_mean, scale=window_std)
+			# if lower_th <= pix_val <= upper_th:
+				#reclassify as a candidate pixel 
+			print(upper_th)
+
