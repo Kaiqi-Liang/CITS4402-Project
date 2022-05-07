@@ -20,8 +20,7 @@ def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):
 				for j in range(max(col - 5, 0), min(col + 6)):
 					if lower_th <= object[i,j] <= upper_th:
 						object[i,j] = 1
-					else:
-						object[i,j] = 0
+				
 					 
 			
 
