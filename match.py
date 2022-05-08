@@ -4,8 +4,10 @@ import scipy as sp
 import numpy as np
 import skimage
 def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):	
+	res = []
 	for object, gray_image in candidate_small_objects:	
-		# label connected regions in binary image	
+		# label connected regions in binary image
+		object2 = np.copy(object)	
 		labelled_image = skimage.measure.label(object)
 		properties = skimage.measure.regionprops(labelled_image)
 		for property in properties:
@@ -24,11 +26,13 @@ def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):
 			# get the lower quantile limit of candidate cluster
 			lower_th = sp.stats.norm.ppf(0.005, loc=window_mean, scale=window_std)
 			# mark the pixels within the quantile interval as being part of candidate cluster in object
-			for i in range(max(row-5,0), min(row+6)):
-				for j in range(max(col - 5, 0), min(col + 6)):
+			for i in range(max(row-5,0), min(row+6, 1024)):
+				for j in range(max(col - 5, 0), min(col + 6, 1024)):
 					if lower_th <= object[i,j] <= upper_th:
-						object[i,j] = 1
-				
+						object2[i,j] = 1
+	res.append([object,object2])
+	return res
+			
 					 
 			
 
