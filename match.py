@@ -3,6 +3,8 @@ import cv2
 import scipy as sp 
 import numpy as np
 import skimage
+import matplotlib.pyplot as plt
+
 def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):	
 	res = []
 	for object, gray_image in candidate_small_objects:	
@@ -31,6 +33,23 @@ def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):
 					if lower_th <= object[i,j] <= upper_th:
 						object2[i,j] = 1
 	res.append([object,object2])
+
+	# Plotting "Region Grow Vs. Original Binary Image"
+	fig = plt.figure(figsize=(10, 7))
+	rows = 1
+	columns = 2
+
+	fig.add_subplot(rows, columns, 1)
+	plt.imshow(res[0][1], cmap='gray')
+	plt.title("REGION GROW")
+
+
+	fig.add_subplot(rows, columns, 2)
+	plt.imshow(res[0][0], cmap='gray')
+	plt.title("ORIGINAL BINARY IMAGE")
+
+	plt.show()
+
 	return res
 			
 					 
