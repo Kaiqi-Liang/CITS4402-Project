@@ -6,9 +6,7 @@ import numpy as np
 import skimage
 import matplotlib.pyplot as plt
 
-def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):	
-	plt.imshow(candidate_small_objects[0][0], cmap='gray')
-	plt.show()
+def candidate_match_discrimination(parser: Parser, candidate_small_objects: list[np.ndarray]):
 	res = []
 	for binary_image, gray_image in candidate_small_objects:
 		# label connected regions in binary image
@@ -45,31 +43,44 @@ def candidate_match_discrimination(candidate_small_objects: list[np.ndarray]):
 						binary_window[i,j] = True
 			binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)] = binary_window
 
+	# Thresholding values
+	area_lower, area_upper = [2, 1000]
+	extent_lower, extent_upper = [0, 1]
+	maxis_lower, maxis_upper = [0, 500]
+	eccentricity_lower, eccentricity_upper = [0, 1]
+
 	for binary_image, _ in candidate_small_objects:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
+
 		properties = skimage.measure.regionprops(labelled_image)
 		for property in properties:
-			print(property.eccentricity)
+			area = property.area
+			extent = area / property.area_bbox
+			maxis = property.axis_major_length
+			eccentricity = property.eccentricity
+			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= maxis <= eccentricity_upper:
+				centroid = property.centroid
+				(min_row, min_col, max_row, max_col) = property.bbox
+				res.append((binary_image[min_row:max_row, min_col:max_col], centroid))
 
-	# res.append([object,object2])
-
-	# Plotting "Region Grow Vs. Original Binary Image"
-	# fig = plt.figure(figsize=(10, 7))
-	# rows = 1
-	# columns = 2
-
-	plt.imshow(candidate_small_objects[0][0], cmap='gray')
-	plt.show()
-
-
-	# fig.add_subplot(rows, columns, 2)
-	# plt.imshow(res[0][0], cmap='gray')
-	# plt.title("ORIGINAL BINARY IMAGE")
-
-
+	#intersection over union
+	width, height = parser.get_gt(1)[0][-2:]
+	area = width * height
 	return res
-			
-					 
-			
 
+def bb_intersection_over_union(box_predict, box_gt):
+	# determine the (x, y)-coordinates of the intersection rectangle
+	xA = max(box_predict[0], box_gt[0])
+	yA = max(box_predict[1], box_gt[1])
+	xB = min(box_predict[2], box_gt[2])
+	yB = min(box_predict[3], box_gt[3])
+
+	interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+
+	box_predictArea = (box_predict[2] - box_predict[0] + 1) * (box_predict[3] - box_predict[1] + 1)
+	box_gtArea = (box_gt[2] - box_gt[0] + 1) * (box_gt[3] - box_gt[1] + 1)
+
+	iou = interArea / float(box_predictArea + box_gtArea - interArea)
+
+	return iou
