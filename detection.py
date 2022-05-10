@@ -44,7 +44,7 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 				# plt.show()
 
 				#(3) Candidate Extractions: Logical AND
-				thresh_and = np.logical_and(thresh_img_12, thresh_img_23) * 255
+				thresh_and = np.logical_and(thresh_img_12, thresh_img_23)
 				binary_cols.append(thresh_and)
 			binary_rows.append(binary_cols)
 		binary_images = []
