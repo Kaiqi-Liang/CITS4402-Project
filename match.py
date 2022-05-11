@@ -11,7 +11,7 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 	true_positive = 0
 	false_positive = 0
 	false_negative = 0
-	for binary_image, gray_image, gt_boxes in candidate_small_objects:
+	for binary_image, gray_image in candidate_small_objects:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
 		properties = skimage.measure.regionprops(labelled_image)
@@ -47,7 +47,7 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)] = binary_window
 
 	# Thresholding values
-	area_lower, area_upper = [2, 1000]
+	area_lower, area_upper = [1, 1000]
 	extent_lower, extent_upper = [0, 1]
 	maxis_lower, maxis_upper = [0, 500]
 	eccentricity_lower, eccentricity_upper = [0, 1]
@@ -64,24 +64,29 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			eccentricity = property.eccentricity
 			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= maxis <= eccentricity_upper:
 				centroid = property.centroid
-				(min_row, min_col, max_row, max_col) = property.bbox
-				res.append([binary_image[min_row:max_row, min_col:max_col], centroid, gt_boxes])
-		
+				box_pred = property.bbox
+				area_predict = (max_row - min_row) * (max_col - min_col)
+				res.append([binary_image[min_row:max_row, min_col:max_col], centroid])
+
 	#intersection over union
 	width, height = parser.get_gt(1)[0][-2:]
 	area = width * height
 	return res
 
-def bb_intersection_over_union(box_predict, box_gt):
-	# determine the (x, y)-coordinates of the intersection rectangle
-	xA = max(box_predict[0], box_gt[0])
-	yA = max(box_predict[1], box_gt[1])
-	xB = min(box_predict[2], box_gt[2])
-	yB = min(box_predict[3], box_gt[3])
+def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
 
-	interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+	predict_xmin, predict_ymin, predict_xmax, predict_ymax = box_pred
 
-	box_predictArea = (box_predict[2] - box_predict[0] + 1) * (box_predict[3] - box_predict[1] + 1)
+	gt_xmin, gt_ymin, gt_xmax, gt_ymax = box_gt
+	
+	#detemine x-y coords of the intersection rectangle 
+
+	
+
+
+	interArea = abs(max(xB-xA, 0)) max(0, xB - xA) * max(0, yB - yA)
+
+	box_predictArea = (predict[2] - predict[0] + 1) * (predict[3] - predict[1] + 1)
 	box_gtArea = (box_gt[2] - box_gt[0] + 1) * (box_gt[3] - box_gt[1] + 1)
 
 	iou = interArea / float(box_predictArea + box_gtArea - interArea)
