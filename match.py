@@ -8,7 +8,10 @@ import matplotlib.pyplot as plt
 
 def candidate_match_discrimination(parser: Parser, candidate_small_objects: list[np.ndarray]):
 	res = []
-	for binary_image, gray_image in candidate_small_objects:
+	true_positive = 0
+	false_positive = 0
+	false_negative = 0
+	for binary_image, gray_image, gt_boxes in candidate_small_objects:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
 		properties = skimage.measure.regionprops(labelled_image)
@@ -63,6 +66,19 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 				centroid = property.centroid
 				(min_row, min_col, max_row, max_col) = property.bbox
 				res.append((binary_image[min_row:max_row, min_col:max_col], centroid))
+		
+		for box_gt in range(len(gt_boxes)):
+			cal_iou = bb_intersection_over_union(binary_image, box_gt)
+			if cal_iou >= 0.7:
+				true_positive += 1
+			elif binary_image and cal_iou <= 0.7 :
+				false_positive += 1
+				np.zeros(binary_image)			
+			elif box_gt and cal_iou <= 0.7 :
+				false_negative += 1
+		
+		precision = true_positive / (true_positive + false_positive)
+		recall = true_positive / (true_positive + false_negative)		
 
 	#intersection over union
 	width, height = parser.get_gt(1)[0][-2:]

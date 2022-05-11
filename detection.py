@@ -14,6 +14,7 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		img1 = parser.load_frame(n - 1)
 		img2 = parser.load_frame(n)
 		img3 = parser.load_frame(n + 1)
+		gt_boxes = parser.get_gt(n)[0][-4:]
 
 		#Convert from BGR to Greyscale
 		gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
@@ -53,7 +54,7 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		for row in binary_rows:
 			binary_images.append(np.array([list(itertools.chain(*col)) for col in zip(*row)]))
 		# append the binary image and the gray image to list
-		res.append([np.concatenate(binary_images), gray2])
+		res.append([np.concatenate(binary_images), gray2, box_gt])
 
 		# plt.imshow(res[0], cmap='gray')
 		# plt.title("logical AND")
