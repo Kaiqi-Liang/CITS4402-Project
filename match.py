@@ -81,8 +81,10 @@ def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
 	
 	#detemine x-y coords of the intersection rectangle 
 
-	
-
+    xA = max(predict_xmin[0], gt_xmin[0])
+    yA = max(predict_ymin[1], gt_ymin[1])
+    xB = min(predict_xmax[2], gt_xmax[2])
+    yB = min(predict_ymax[3], gt_ymax[3])	
 
 	interArea = abs(max(xB-xA, 0)) max(0, xB - xA) * max(0, yB - yA)
 
