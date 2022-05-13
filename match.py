@@ -92,19 +92,23 @@ def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
 	iou = interArea / float(box_predictArea + box_gtArea - interArea)
 
 	return iou
-
+# calculate measure of quality of predicted candidate clusters
 def accuracy(res: list[np.ndarray]):
 	res = []
 	for binary_image, centroid, gt_boxes in res:
 		for box_gt in gt_boxes:
 			cal_iou = bb_intersection_over_union(binary_image, box_gt)
+			# if true positive append the binary image
 			if cal_iou >= 0.7:
 				true_positive += 1
 				res.append([binary_image, centroid])
+			# if false positive
 			elif binary_image and cal_iou <= 0.7 :
 				false_positive += 1
+			# if false negative
 			elif box_gt and cal_iou <= 0.7 :
 				false_negative += 1
+	# calculate precision and recall
 	precision = true_positive / (true_positive + false_positive)
 	print(precision)
 	recall = true_positive / (true_positive + false_negative)		
