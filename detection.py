@@ -53,10 +53,6 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		for row in binary_rows:
 			binary_images.append(np.array([list(itertools.chain(*col)) for col in zip(*row)]))
 		# append the binary image and the gray image to list
-		res.append([np.concatenate(binary_images), gray2])
-
-		# plt.imshow(res[0], cmap='gray')
-		# plt.title("logical AND")
-		# plt.show()
+		res.append([np.concatenate(binary_images), gray2, parser.get_gt(n)])
 
 	return res

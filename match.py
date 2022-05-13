@@ -1,4 +1,3 @@
-from curses import window
 from parser import Parser
 import cv2
 import scipy as sp 
@@ -7,11 +6,12 @@ import skimage
 import matplotlib.pyplot as plt
 
 def candidate_match_discrimination(parser: Parser, candidate_small_objects: list[np.ndarray]):
-	res = []
+	pred_res = []
+	gt_res = []
 	true_positive = 0
 	false_positive = 0
 	false_negative = 0
-	for binary_image, gray_image in candidate_small_objects:
+	for binary_image, gray_image, _ in candidate_small_objects:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
 		properties = skimage.measure.regionprops(labelled_image)
@@ -47,12 +47,12 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)] = binary_window
 
 	# Thresholding values
-	area_lower, area_upper = [1, 1000]
-	extent_lower, extent_upper = [0, 1]
+	area_lower, area_upper = [40, 50]
+	extent_lower, extent_upper = [0.5, 1]
 	maxis_lower, maxis_upper = [0, 500]
-	eccentricity_lower, eccentricity_upper = [0, 1]
+	eccentricity_lower, eccentricity_upper = [0.5, 1]
 
-	for binary_image, _ in candidate_small_objects:
+	for binary_image, _, gt in candidate_small_objects:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
 
@@ -62,48 +62,59 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			extent = area / property.area_bbox
 			maxis = property.axis_major_length
 			eccentricity = property.eccentricity
-			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= maxis <= eccentricity_upper:
+			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
 				centroid = property.centroid
-				box_pred = property.bbox
-				area_predict = (max_row - min_row) * (max_col - min_col)
-				res.append([binary_image[min_row:max_row, min_col:max_col], centroid])
+				(min_row, min_col, max_row, max_col) = property.bbox
+				pred_res.append([min_row, min_col, max_row, max_col, centroid])
 
 	#intersection over union
-	width, height = parser.get_gt(1)[0][-2:]
-	area = width * height
-	return res
+
+		for gt_box in gt:
+			topleftx, toplefty, width, height = gt_box[-4:]
+			min_row = toplefty
+			min_col = topleftx
+			max_row = min_row + height
+			max_col = min_col + width 
+			box_gt = (min_row, min_col, max_row, max_col)
+			gt_res.append(box_gt)
+	print(pred_res[:10])
+	print()
+	print(gt_res[:10])
+	return pred_res
 
 def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
-
-	predict_xmin, predict_ymin, predict_xmax, predict_ymax = box_pred
-
-	gt_xmin, gt_ymin, gt_xmax, gt_ymax = box_gt
 	
 	#detemine x-y coords of the intersection rectangle 
 
-    xA = max(predict_xmin[0], gt_xmin[0])
-    yA = max(predict_ymin[1], gt_ymin[1])
-    xB = min(predict_xmax[2], gt_xmax[2])
-    yB = min(predict_ymax[3], gt_ymax[3])	
+	xA = max(box_pred[0], box_gt[0])
+	yA = max(box_pred[1], box_gt[1])
+	xB = min(box_pred[2], box_gt[2])
+	yB = min(box_pred[3], box_gt[3])	
 
-	interArea = abs(max(xB-xA, 0)) max(0, xB - xA) * max(0, yB - yA)
+	interArea = abs(max((xB - xA, 0)) * max((yB - yA), 0))
+	
+	if interArea == 0:
+		return 0
 
-	box_predictArea = (predict[2] - predict[0] + 1) * (predict[3] - predict[1] + 1)
-	box_gtArea = (box_gt[2] - box_gt[0] + 1) * (box_gt[3] - box_gt[1] + 1)
+	box_predArea = abs((box_pred[2] - box_pred[0]) * (box_pred[3] - box_pred[1]))
+	
+	box_gtArea = abs((box_gt[2] - box_gt[0]) * (box_gt[3] - box_gt[1]))
 
-	iou = interArea / float(box_predictArea + box_gtArea - interArea)
+	iou = interArea / float(box_predArea + box_gtArea - interArea)
 
 	return iou
+
+
 # calculate measure of quality of predicted candidate clusters
-def accuracy(res: list[np.ndarray]):
-	res = []
-	for binary_image, centroid, gt_boxes in res:
+def accuracy(pred_res: list[np.ndarray]):
+	pred_res = []
+	for binary_image, centroid, gt_boxes in pred_res:
 		for box_gt in gt_boxes:
 			cal_iou = bb_intersection_over_union(binary_image, box_gt)
 			# if true positive append the binary image
 			if cal_iou >= 0.7:
 				true_positive += 1
-				res.append([binary_image, centroid])
+				pred_res.append([binary_image, centroid])
 			# if false positive
 			elif binary_image and cal_iou <= 0.7 :
 				false_positive += 1
@@ -115,4 +126,4 @@ def accuracy(res: list[np.ndarray]):
 	print(precision)
 	recall = true_positive / (true_positive + false_negative)		
 	print(recall)
-	return res	
+	return pred_res	
