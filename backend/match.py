@@ -1,6 +1,5 @@
 from kalman import filter_init
 from parser import Parser
-import cv2
 import scipy as sp 
 import numpy as np
 import skimage

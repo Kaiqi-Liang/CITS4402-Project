@@ -43,12 +43,11 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 				thresh_and = np.logical_and(thresh_img_12, thresh_img_23)
 				binary_cols.append(thresh_and)
 			binary_rows.append(binary_cols)
-		binary_images = []
 
 		# merge the 30x30 split images back into 1 binary image
-		for row in binary_rows:
-			binary_images.append(np.array([list(itertools.chain(*col)) for col in zip(*row)]))
+		binary_image = np.concatenate([[list(itertools.chain(*col)) for col in zip(*row)] for row in binary_rows])
+
 		# append the binary image and the gray image to list
-		res.append([np.concatenate(binary_images), gray2, parser.get_gt(n)])
+		res.append([binary_image, gray2, parser.get_gt(n)])
 
 	return res
