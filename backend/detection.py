@@ -33,15 +33,15 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 				diff_img_23 = cv2.absdiff(gray3_split, gray2_split)
 
 				#(2) Thresholding: convert greyscale to binary
-				pfa = 0.05
-				th_12 = - np.log(pfa) * np.mean(diff_img_12)
-				th_23 = - np.log(pfa) * np.mean(diff_img_23)
+				PFA = 0.05
+				th_12 = -np.log(PFA) * np.mean(diff_img_12)
+				th_23 = -np.log(PFA) * np.mean(diff_img_23)
 				thresh_img_12 = cv2.threshold(diff_img_12, th_12, 1, cv2.THRESH_BINARY)[1]
 				thresh_img_23 = cv2.threshold(diff_img_23, th_23, 1, cv2.THRESH_BINARY)[1]
 
 				#(3) Candidate Extractions: Logical AND
-				thresh_and = np.logical_and(thresh_img_12, thresh_img_23)
-				binary_cols.append(thresh_and)
+				binary_cols.append(np.logical_and(thresh_img_12, thresh_img_23))
+
 			binary_rows.append(binary_cols)
 
 		# merge the 30x30 split images back into 1 binary image

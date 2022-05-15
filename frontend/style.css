@@ -44,7 +44,7 @@ input[type=submit] {
 	cursor: pointer;
 	padding: 0 6px;
 	width: 10vw;
-	min-width: 80px;
+	min-width: 100px;
 }
 
 input[type=submit]:hover {

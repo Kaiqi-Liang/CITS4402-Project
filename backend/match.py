@@ -8,9 +8,6 @@ import matplotlib.pyplot as plt
 def candidate_match_discrimination(parser: Parser, candidate_small_objects: list[np.ndarray]):
 	pred_res = []
 	gt_res = []
-	true_positive = 0
-	false_positive = 0
-	false_negative = 0
 	for binary_image, gray_image, _ in candidate_small_objects:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
@@ -20,6 +17,7 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			row, col = property.centroid
 			row = round(row)
 			col = round(col)
+
 			# put 11 x 11 search window centered around centroid
 			binary_window = binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)]
 			gray_window = gray_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)]
@@ -37,7 +35,6 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			upper_th = min(sp.stats.norm.ppf(0.995, loc=window_mean, scale=window_std), 255)
 			# get the lower quantile limit of candidate cluster
 			lower_th = sp.stats.norm.ppf(0.005, loc=window_mean, scale=window_std)
-			# print(upper_th, lower_th)
 
 			# mark the pixels within the quantile interval as being part of candidate cluster in object
 			for i, pixels in enumerate(gray_window):
