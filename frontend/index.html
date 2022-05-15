@@ -11,9 +11,15 @@
 <body>
 	<h1>Small target tracking in satellite images</h1>
 	<form name="range">
-		<input name="folder" type="text" value="mot/car/001">
-		<input name="start" type="number" value="1">
-		<input name="end" type="number" value="4">
+		<div class="section">
+			<label for="folder">Image Folder</label>
+			<input id="folder" name="folder" type="text" value="mot/car/001">
+		</div>
+		<div class="section">
+			<label>Frame Range</label>
+			<input name="start" type="number" value="1">
+			<input name="end" type="number" value="4">
+		</div>
 		<input type="submit">
 	</form>
 	<img id="img" src="" alt="image">

@@ -44,8 +44,18 @@ input[type=submit] {
 	cursor: pointer;
 	padding: 0 6px;
 	width: 10vw;
+	min-width: 80px;
 }
 
 input[type=submit]:hover {
 	background: #9e77f3;
+}
+
+label {
+	width: 100px;
+	display: inline-block;
+}
+
+.section {
+	margin: 10px 0;
 }
