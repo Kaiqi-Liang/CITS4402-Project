@@ -5,13 +5,15 @@ import cv2
 class Parser:
 	def __init__(self, folder: str, template: str, frame_range: tuple[int, int] = None) -> None:
 		self.folder = f'{folder}/img/'
+		self.frames = sorted(os.listdir(self.folder))
+		self.start = int(self.frames[0][:self.frames[0].find('.')])
+		self.end = int(self.frames[-1][:self.frames[-1].find('.')])
 		if frame_range:
-			self.start, self.end = frame_range
+			start, end = frame_range
+			if start < self.start or end > self.end:
+				raise ValueError()
+			self.start, self.end = start, end
 			self.frames = [f'{self.folder}{template.format(frame)}' for frame in range(self.start, self.end)]
-		else:
-			self.frames = sorted(os.listdir(self.folder))
-			self.start = int(self.frames[0][:self.frames[0].find('.')])
-			self.end = int(self.frames[-1][:self.frames[-1].find('.')])
 
 		self.gt = []
 		self.gt_centroid = []
