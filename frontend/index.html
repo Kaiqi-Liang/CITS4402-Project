@@ -11,18 +11,21 @@
 <body>
 	<h1>Small target tracking in satellite images</h1>
 	<form name="range">
-		<div class="section">
+		<div>
 			<label for="folder">Image Folder</label>
 			<input id="folder" name="folder" type="text" value="mot/car/001">
 		</div>
-		<div class="section">
+		<div>
 			<label>Frame Range</label>
 			<input name="start" type="number" value="1">
 			<input name="end" type="number" value="4">
 		</div>
 		<input type="submit">
 	</form>
-	<img id="img" src="" alt="image">
+	<h2 id="title">Below are the results from the first frame of each step to show the inner working of the algorithm</h2>
+	<img id="spinner" src="" alt="image">
+	<img id="detection" src="" alt="image">
+	<img id="match" src="" alt="image">
 	<div id="alert"></div>
 </body>
 </html>

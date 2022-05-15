@@ -1,9 +1,9 @@
 const form = document.forms.range;
 form.addEventListener('submit', async (event) => {
 	event.preventDefault();
-	const img = document.getElementById('img');
-	img.style.display = 'block';
-	img.src = 'spinner.svg';
+	const spinner = document.getElementById('spinner');
+	spinner.style.display = 'block';
+	spinner.src = 'spinner.svg';
 	const folder = form.folder.value;
 	const start = form.start.value;
 	const end = form.end.value;
@@ -19,15 +19,21 @@ form.addEventListener('submit', async (event) => {
 		}),
 	});
 	const data = await res.json();
+	spinner.style.display = 'none';
+	document.getElementById('title').style.display = 'block';
 	if (!res.ok) {
 		const snackbar = document.getElementById('alert');
 		snackbar.style.display = 'flex';
 		snackbar.innerText = data.message;
-		img.style.display = 'none';
 		setTimeout(() => {
 			snackbar.style.display = 'none';
 		}, 2000);
 	} else {
-		img.src = '../binary.jpg';
+		const detection = document.getElementById('detection');
+		detection.src = '../candidate_detection.jpg';
+		detection.style.display = 'block';
+		const match = document.getElementById('match');
+		match.src = '../region_growing.jpg';
+		match.style.display = 'block';
 	}
 });

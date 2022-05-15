@@ -14,7 +14,7 @@ form {
 	margin-bottom: 20px;
 }
 
-img, #alert {
+img, #title, #alert {
 	display: none;
 }
 
@@ -56,6 +56,6 @@ label {
 	display: inline-block;
 }
 
-.section {
+form > div {
 	margin: 10px 0;
 }

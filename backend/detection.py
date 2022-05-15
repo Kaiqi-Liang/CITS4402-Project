@@ -1,6 +1,6 @@
-# Candidate small object detection: Motion-Based Detection Using Local Noise Modelling Algorithm 
-
-#import relevant packages 
+'''
+Candidate small object detection: Motion-Based Detection Using Local Noise Modelling Algorithm
+'''
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
@@ -50,4 +50,7 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		# append the binary image and the gray image to list
 		res.append([binary_image, gray2, parser.get_gt(n)])
 
+	plt.title('candidate small object detection')
+	plt.imshow(res[0][0], 'gray')
+	plt.savefig('candidate_detection.jpg')
 	return res

@@ -46,6 +46,10 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 						binary_window[i,j] = True
 			binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)] = binary_window
 
+	plt.title('region growing')
+	plt.imshow(candidate_small_objects[0][0], 'gray')
+	plt.savefig('region_growing.jpg')
+
 	# Thresholding values
 	area_lower, area_upper = [2, 11]
 	extent_lower, extent_upper = [0.7, .95]
@@ -75,9 +79,6 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			max_col = min_col + width 
 			gt_res.append((min_row, min_col, max_row, max_col))
 
-	plt.axis('off')
-	plt.imshow(candidate_small_objects[0][0], 'gray')
-	plt.savefig('binary.jpg')
 	max_track_id = gt[-1][0]
 	match = False
 	for hypothesis in pred_res:
