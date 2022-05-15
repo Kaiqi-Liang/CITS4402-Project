@@ -20,7 +20,13 @@ form.addEventListener('submit', async (event) => {
 	});
 	const data = await res.json();
 	if (!res.ok) {
-		alert(data.message)
+		const snackbar = document.getElementById('alert');
+		snackbar.style.display = 'flex';
+		snackbar.innerText = data.message;
+		img.style.display = 'none';
+		setTimeout(() => {
+			snackbar.style.display = 'none';
+		}, 2000);
 	} else {
 		img.src = '../binary.jpg';
 	}
