@@ -1,6 +1,9 @@
 const form = document.forms.range;
 form.addEventListener('submit', async (event) => {
 	event.preventDefault();
+	const img = document.getElementById('img');
+	img.style.display = 'block';
+	img.src = 'spinner.svg';
 	const folder = form.folder.value;
 	const start = form.start.value;
 	const end = form.end.value;
@@ -15,8 +18,10 @@ form.addEventListener('submit', async (event) => {
 			end,
 		}),
 	});
+	const data = await res.json();
 	if (!res.ok) {
-		const data = await res.json();
 		alert(data.message)
+	} else {
+		img.src = '../binary.jpg';
 	}
 });

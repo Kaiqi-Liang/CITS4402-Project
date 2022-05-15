@@ -10,8 +10,8 @@ class Parser:
 		self.end = int(self.frames[-1][:self.frames[-1].find('.')])
 		if frame_range:
 			start, end = frame_range
-			if start < self.start or end > self.end:
-				raise ValueError()
+			if start < self.start or end > self.end or end - start < 3:
+				raise ValueError
 			self.start, self.end = start, end
 			self.frames = [f'{self.folder}{template.format(frame)}' for frame in range(self.start, self.end)]
 

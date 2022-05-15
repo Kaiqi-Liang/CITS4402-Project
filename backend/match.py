@@ -76,6 +76,9 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			max_col = min_col + width 
 			gt_res.append((min_row, min_col, max_row, max_col))
 
+	plt.axis('off')
+	plt.imshow(candidate_small_objects[0][0], 'gray')
+	plt.savefig('binary.jpg')
 	max_track_id = gt[-1][0]
 	match = False
 	for hypothesis in pred_res:

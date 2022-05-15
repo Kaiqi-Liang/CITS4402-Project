@@ -3,6 +3,8 @@ from flask_cors import CORS, cross_origin
 from detection import candidate_small_objects_detection
 from match import candidate_match_discrimination
 from parser import Parser
+import matplotlib
+matplotlib.use('Agg')
 
 APP = Flask(__name__)
 CORS(APP)
