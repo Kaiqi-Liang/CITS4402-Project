@@ -10,6 +10,10 @@ body {
 	background: rgb(37, 38, 39);
 }
 
+form {
+	margin-bottom: 20px;
+}
+
 img, #alert {
 	display: none;
 }
