@@ -27,10 +27,10 @@ class Parser:
 		return self.start, self.end
 
 	def load_frame(self, frame: int) -> np.ndarray:
-		return cv2.imread(self.frames[frame - 1])
+		return cv2.imread(self.frames[frame - self.start])
 
 	def get_gt(self, frame: int) -> list[list[int]]:
-		return self.gt[frame - 1]
+		return self.gt[frame - self.start]
 
 	def get_gt_centroid(self, frame: int) -> list[list[int]]:
-		return self.gt_centroid[frame - 1]
+		return self.gt_centroid[frame - self.start]

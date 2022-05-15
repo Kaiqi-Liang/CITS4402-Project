@@ -52,11 +52,6 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 	extent_lower, extent_upper = [0.7, .95]
 	maxis_lower, maxis_upper = [2, 7]
 	eccentricity_lower, eccentricity_upper = [0.7, 0.9]
-
-
-	# plt.imshow(candidate_small_objects[0][0], cmap='gray')
-	# plt.title("after region growing")
-	# plt.show()
 	for binary_image, _, gt in candidate_small_objects:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
@@ -67,8 +62,7 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			extent = area / property.area_bbox
 			maxis = property.axis_major_length
 			eccentricity = property.eccentricity
-			if True:
-				# area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
+			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
 				centroid = property.centroid
 				min_row, min_col, max_row, max_col = property.bbox
 				pred_res.append(((min_row, min_col, max_row, max_col), centroid))
@@ -100,9 +94,6 @@ def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
 	yA = max(box_pred[1], box_gt[1]) # min col
 	xB = min(box_pred[2], box_gt[2]) # max row
 	yB = min(box_pred[3], box_gt[3]) # max col 
-	# print(box_pred)
-	# print(box_gt)
-	# print(xA, yA, xB, yB)
 
 	# compute the area of intersection rectangle
 	interArea = abs(max((xB - xA, 0)) * max((yB - yA), 0))
