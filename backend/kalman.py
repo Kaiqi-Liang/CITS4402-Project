@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 
 def track_association(frames):
+
     for hypotheses, gt in frames:
         length = max(len(hypotheses), len(gt))
         gt_centroid = [(centroid[1], centroid[2]) for centroid in gt]
@@ -15,31 +16,60 @@ def track_association(frames):
 
         hypotheses_idx, gt_idx = sp.optimize.linear_sum_assignment(cost_matrix)
 
-        # if len(hypotheses) > length:
-        #     # more hypothesis then gt centroids
-        #     diff = len(gt_centroid)
+        # print(hypotheses_idx, gt_idx)
 
-        if len(hypotheses) < length:
+        if len(hypotheses) > len(gt):
+            # more hypothesis centroids then gt centroids
+            # thus there will be unassigned hypothesis - these will be passed into filter_init
+            diff = length - len(gt_centroid)
+            matched_clusters = []
+            for idx in range(len(gt)):
+                matched_clusters.append([hypotheses_centroid[list(gt_idx).index(idx)], gt_centroid[idx]])
+            
+            # hypothesis assigned to a pseudo track are unassigned hypothesis
+            unassigned_hypothesis = []
+            for idx in hypotheses_idx[-diff:]:
+                unassigned_hypothesis.append(hypotheses_centroid[list(gt_idx).index(idx)])
+
+            init_tracks(unassigned_hypothesis)
+            # print(unassigned_hypothesis)
+            # print(matched_clusters)
+
+        elif len(hypotheses) < len(gt):
             # more gt centroids than hypothesis centroids
+            # thus there will be unassigned track ID's - these will be passed in nearest search 
             diff = length - len(hypotheses)
             matched_clusters = []
-            for i in range(len(hypotheses)):
-                matched_clusters.append([hypotheses_centroid[i], gt_centroid[gt_idx[i]]])
+            for idx in range(len(hypotheses)):
+                matched_clusters.append([hypotheses_centroid[idx], gt_centroid[gt_idx[idx]]])
 
+            # tracks assigned to pseudo hypothesis are unassigned tracks 
             unassigned_tracks = []
             for idx in hypotheses_idx[-diff:]:
                 unassigned_tracks.append(gt_centroid[list(gt_idx).index(idx)])
-            print(unassigned_tracks)
-            print(matched_clusters)
 
-def nearest_search():
+            nearest_search(unassigned_tracks)
+            # print(unassigned_tracks)
+            # print(matched_clusters)
+        
+        else:
+            # same amount of clusters in both 
+            matched_clusters = []
+            for i in range(len(hypotheses)):
+                matched_clusters.append([hypotheses_centroid[i], gt_centroid[gt_idx[i]]])
+    
+    return matched_clusters 
+    
+
+def nearest_search(unassigned_tracks):
+    #for unassigned track ID's, i.e. gt clusters with no match in hypothesis 
     pass
 
-def filter_init(centroid, maxtrack_ID):
-    # no match in gt 
+def init_tracks(unassigned_hypothesis):
+    #for unassigned hypothesis, i.e. predicted clusters with no match in gt
 
-    track_id = maxtrack_ID
     # state = pd.DataFrame[centroid[0], centroid[1], 0, 0, 0, 0]
 
     # std = np.arra
     # motion_cov = np.diag(std)
+    pass
