@@ -4,6 +4,10 @@ form.addEventListener('submit', async (event) => {
 	const spinner = document.getElementById('spinner');
 	spinner.style.display = 'block';
 	spinner.src = 'spinner.svg';
+	const detection = document.getElementById('detection');
+	const match = document.getElementById('match');
+	match.style.display = 'none';
+	detection.style.display = 'none';
 	const folder = form.folder.value;
 	const start = form.start.value;
 	const end = form.end.value;
@@ -29,10 +33,8 @@ form.addEventListener('submit', async (event) => {
 			snackbar.style.display = 'none';
 		}, 2000);
 	} else {
-		const detection = document.getElementById('detection');
 		detection.src = '../candidate_detection.jpg';
 		detection.style.display = 'block';
-		const match = document.getElementById('match');
 		match.src = '../region_growing.jpg';
 		match.style.display = 'block';
 	}

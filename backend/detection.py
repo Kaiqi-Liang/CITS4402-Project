@@ -8,8 +8,12 @@ import cv2
 from parser import Parser
 
 def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
+	'''
+	Input: for each frame index n from 1 to N-1, this step takes as input the frames at index n-1, n and n+1
+	Output: for each frame index n from 1 to N-1, this step outputs a binary image representing candidate small objects
+	'''
 	start, end = parser.get_frame_range()
-	res = []
+	output = []
 	for n in range(start + 1, end - 1):
 		img1 = parser.load_frame(n - 1)
 		img2 = parser.load_frame(n)
@@ -48,9 +52,9 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		binary_image = np.concatenate([[list(itertools.chain(*col)) for col in zip(*row)] for row in binary_rows])
 
 		# append the binary image and the gray image to list
-		res.append([binary_image, gray2, parser.get_gt(n)])
+		output.append((binary_image, gray2, parser.get_gt_centroid(n)))
 
 	plt.title('candidate small object detection')
-	plt.imshow(res[0][0], 'gray')
+	plt.imshow(output[0][0], 'gray')
 	plt.savefig('candidate_detection.jpg')
-	return res
+	return output

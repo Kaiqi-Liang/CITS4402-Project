@@ -1,14 +1,16 @@
-from kalman import filter_init
 from parser import Parser
 import scipy as sp 
 import numpy as np
 import skimage
 import matplotlib.pyplot as plt
 
-def candidate_match_discrimination(parser: Parser, candidate_small_objects: list[np.ndarray]):
-	pred_res = []
-	gt_res = []
-	for binary_image, gray_image, _ in candidate_small_objects:
+def candidate_match_discrimination(frames: list[np.ndarray]):
+	'''
+	Input: for each frame index n from 1 to N-1, this step takes as input a binary image representing the candidate small objects.
+	Output: for each frame index n from 1 to N-1, this step outputs the bounding box and centroid of each candidate small object.
+	'''
+	output = []
+	for binary_image, gray_image, _ in frames:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
 		properties = skimage.measure.regionprops(labelled_image)
@@ -44,15 +46,16 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)] = binary_window
 
 	plt.title('region growing')
-	plt.imshow(candidate_small_objects[0][0], 'gray')
+	plt.imshow(frames[0][0], 'gray')
 	plt.savefig('region_growing.jpg')
 
-	# Thresholding values
+	candidate_small_objects = []
+	# Threshold values
 	area_lower, area_upper = [2, 11]
 	extent_lower, extent_upper = [0.7, .95]
 	maxis_lower, maxis_upper = [2, 7]
 	eccentricity_lower, eccentricity_upper = [0.7, 0.9]
-	for binary_image, _, gt in candidate_small_objects:
+	for binary_image, _, gt in frames:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
 
@@ -63,30 +66,30 @@ def candidate_match_discrimination(parser: Parser, candidate_small_objects: list
 			maxis = property.axis_major_length
 			eccentricity = property.eccentricity
 			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
-				centroid = property.centroid
-				min_row, min_col, max_row, max_col = property.bbox
-				pred_res.append(((min_row, min_col, max_row, max_col), centroid))
+				candidate_small_objects.append((property.centroid, property.bbox))
+
+		output.append((candidate_small_objects, gt))
+	return output
 
 		# intersection over union
-		for gt_box in gt:
-			topleftx, toplefty, width, height = gt_box[-4:]
-			min_row = toplefty
-			min_col = topleftx
-			max_row = min_row + height
-			max_col = min_col + width 
-			gt_res.append((min_row, min_col, max_row, max_col))
+		# for gt_box in gt:
+		# 	topleftx, toplefty, width, height = gt_box[-4:]
+		# 	min_row = toplefty
+		# 	min_col = topleftx
+		# 	max_row = min_row + height
+		# 	max_col = min_col + width
+		# 	gt_res.append((min_row, min_col, max_row, max_col))
 
-	max_track_id = gt[-1][0]
-	match = False
-	for hypothesis in pred_res:
-		for gt_track in gt_res:
-			if (bb_intersection_over_union(hypothesis[0], gt_track) >= 0.7):
-				print(hypothesis[0], gt_track)
-				match = True
-		if not match:
-			max_track_id += 1
-			filter_init(hypothesis, max_track_id)
-	return pred_res
+	# max_track_id = gt[-1][0]
+	# match = False
+	# for hypothesis in pred_res:
+	# 	for gt_track in gt_res:
+	# 		if (bb_intersection_over_union(hypothesis[0], gt_track) >= 0.7):
+	# 			print(hypothesis[0], gt_track)
+	# 			match = True
+	# 	if not match:
+	# 		max_track_id += 1
+	# 		filter_init(hypothesis, max_track_id)
 
 def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
 	#determine x-y coords of the intersection rectangle 
@@ -116,6 +119,9 @@ def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
 def accuracy(pred_res: list[np.ndarray], gt_res: list[np.ndarray]):
 	pred_res1 = []
 	gt_res1 = []
+	true_positive = 0
+	false_positive = 0
+	false_negative = 0
 	for binary_image, centroid in pred_res:
 		for box_gt in gt_res:
 			cal_iou = bb_intersection_over_union(binary_image, box_gt)
