@@ -24,7 +24,6 @@ form.addEventListener('submit', async (event) => {
 	});
 	const data = await res.json();
 	spinner.style.display = 'none';
-	document.getElementById('title').style.display = 'block';
 	if (!res.ok) {
 		const snackbar = document.getElementById('alert');
 		snackbar.style.display = 'flex';
@@ -33,6 +32,7 @@ form.addEventListener('submit', async (event) => {
 			snackbar.style.display = 'none';
 		}, 2000);
 	} else {
+		document.getElementById('title').style.display = 'block';
 		detection.src = '../candidate_detection.jpg';
 		detection.style.display = 'block';
 		match.src = '../region_growing.jpg';

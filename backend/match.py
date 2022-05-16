@@ -1,8 +1,7 @@
-from parser import Parser
-import scipy as sp 
-import numpy as np
-import skimage
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy as sp 
+import skimage
 
 def candidate_match_discrimination(frames: list[np.ndarray]):
 	'''

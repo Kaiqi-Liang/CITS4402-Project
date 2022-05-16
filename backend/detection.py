@@ -1,11 +1,11 @@
 '''
 Candidate small object detection: Motion-Based Detection Using Local Noise Modelling Algorithm
 '''
-import itertools
-import numpy as np
 import matplotlib.pyplot as plt
-import cv2
+import numpy as np
 from parser import Parser
+import itertools
+import cv2
 
 def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 	'''
