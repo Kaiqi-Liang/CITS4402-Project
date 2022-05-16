@@ -76,9 +76,13 @@ def nearest_search(unassigned_tracks, previous_frame):
 
     hypotheses_idx, gt_idx = sp.optimize.linear_sum_assignment(cost_matrix)            
 
-    matched_clusters = []
+    candidate_clusters = []
     for idx in range(len(unassigned_tracks)):
-        matched_clusters.append([hypotheses_centroid[list(gt_idx).index(idx)], unassigned_tracks[idx]])
+        candidate_clusters.append([hypotheses_centroid[list(gt_idx).index(idx)], unassigned_tracks[idx]])
+
+    matched_clusters = []
+    # Do template matching for candidate clusters, if template matching is high then confirm matched clusters and 
+    # append to matched_clusters
     
     return matched_clusters
 
