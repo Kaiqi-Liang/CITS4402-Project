@@ -15,10 +15,12 @@ CORS(APP)
 @APP.route('/', methods=['POST'])
 def input_frames():
 	folder = request.get_json()['folder']
-	start = int(request.get_json()['start'])
-	end = int(request.get_json()['end'])
 	try:
-		parser = Parser(folder, '{:06}.jpg', (start, end))
+		frame_range = int(request.get_json()['start']), int(request.get_json()['end'])
+	except ValueError:
+		frame_range = None
+	try:
+		parser = Parser(folder, '{:06}.jpg', frame_range)
 		output = candidate_small_objects_detection(parser)
 		output = candidate_match_discrimination(output)
 		track_association(output)

@@ -13,7 +13,7 @@ class Parser:
 			if start < self.start or end > self.end or end - start < 3:
 				raise ValueError
 			self.start, self.end = start, end
-			self.frames = [f'{self.folder}{template.format(frame)}' for frame in range(self.start, self.end)]
+			self.frames = [f'{template.format(frame)}' for frame in range(self.start, self.end)]
 
 		self.gt = []
 		self.gt_centroid = []
@@ -29,7 +29,7 @@ class Parser:
 		return self.start, self.end
 
 	def load_frame(self, frame: int) -> np.ndarray:
-		return cv2.imread(self.frames[frame - self.start])
+		return cv2.imread(f'{self.folder}{self.frames[frame - self.start]}')
 
 	def get_gt(self, frame: int) -> list[list[int]]:
 		return self.gt[frame - self.start]
