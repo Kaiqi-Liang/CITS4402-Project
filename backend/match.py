@@ -51,9 +51,9 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 	candidate_small_objects = []
 	# Threshold values
 	area_lower, area_upper = [2, 11]
-	extent_lower, extent_upper = [0.7, .95]
+	extent_lower, extent_upper = [0.66, .95]
 	maxis_lower, maxis_upper = [2, 7]
-	eccentricity_lower, eccentricity_upper = [0.7, 0.9]
+	eccentricity_lower, eccentricity_upper = [0.80, 0.9]
 	for binary_image, _, gt in frames:
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
@@ -66,6 +66,8 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 			eccentricity = property.eccentricity
 			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
 				candidate_small_objects.append((property.centroid, property.bbox))
+		
+		print(len(candidate_small_objects), len(gt))
 
 		output.append((candidate_small_objects, gt))
 	return output
