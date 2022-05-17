@@ -69,7 +69,7 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 		
 		print(len(candidate_small_objects), len(gt))
 
-		output.append((candidate_small_objects, gt))
+		output.append(candidate_small_objects)
 	return output
 
 		# intersection over union

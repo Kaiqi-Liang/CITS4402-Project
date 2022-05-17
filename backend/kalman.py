@@ -86,11 +86,33 @@ def nearest_search(unassigned_tracks, previous_frame):
     
     return matched_clusters
 
-def init_tracks(unassigned_hypothesis):
-    #for unassigned hypothesis, i.e. predicted clusters with no match in gt
+def init_tracks(frames):
+    max_ID = 0
+    output = []
+    for frame in frames:
+        tracks = []
+        for cluster in frame:
+            track_ID = max_ID
+            state = np.array([cluster[0][0], cluster[0][1], 0, 0, 0, 0])
+            cov = np.diag([1] * 6)
+            cluster_info = (track_ID, state, cov)
+            max_ID += 1
+            tracks.append(cluster_info)
+        output.append((frame, tracks))
+    return output
 
-    # state = pd.DataFrame[centroid[0], centroid[1], 0, 0, 0, 0]
-
-    # std = np.arra
-    # motion_cov = np.diag(std)
-    pass
+def predict(tracks):
+    tstep = 1
+    F = np.diag([1.0] * 6)
+    np.fill_diagonal(F[:-2,2:], tstep)
+    np.fill_diagonal(F[:-4,4:], (tstep ** 2) / 2)
+    F = np.matrix(F)
+    Q = np.matrix(np.diag([1] * 6))
+    predicted_state = []
+    for track in tracks:
+        current_state = track[1]
+        P = track[2]
+        future_state = np.matmul(F, current_state.T)
+        future_cov = np.matmul(F, np.matmul(P, F.T)) + Q
+        predicted_state.append((future_state, future_cov))
+    return predicted_state
