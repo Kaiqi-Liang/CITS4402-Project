@@ -20,6 +20,42 @@
 			<input name="start" type="number" value="1">
 			<input name="end" type="number" value="4">
 		</div>
+		<div class="thresholds">
+			<label>Area Thresholds</label>
+			<span>2.00</span>
+			<input type="range" name="areaUpperTh" min="2" max="8" step="0.01">
+			<span class="margin-right">8.00</span>
+			<span>15.0</span>
+			<input type="range" name="areaLowerTh" min="15" max="30" step="0.01">
+			<span>30.0</span>
+		</div>
+		<div class="thresholds">
+			<label>Extend Thresholds</label>
+			<span>0.50</span>
+			<input type="range" name="extendUpperTh" min="0.5" max="0.75" step="0.01">
+			<span class="margin-right">0.75</span>
+			<span>0.80</span>
+			<input type="range" name="extendLowerTh" min="0.8" max="1" step="0.01">
+			<span>1.00</span>
+		</div>
+		<div class="thresholds">
+			<label>Major Axis Thresholds</label>
+			<span>1.00</span>
+			<input type="range" name="majorAxisUpperTh" min="1" max="3" step="0.01">
+			<span class="margin-right">3.00</span>
+			<span>5.00</span>
+			<input type="range" name="majorAxisLowerTh" min="5" max="9" step="0.01">
+			<span>9.00</span>
+		</div>
+		<div class="thresholds">
+			<label>Eccentricity Thresholds</label>
+			<span>0.70</span>
+			<input type="range" name="eccentricityUpperTh" min="0.7" max="0.8" step="0.01">
+			<span class="margin-right">0.80</span>
+			<span>0.80</span>
+			<input type="range" name="eccentricityLowerTh" min="0.8" max="1" step="0.01">
+			<span>1.00</span>
+		</div>
 		<input type="submit" value="Start Tracking">
 	</form>
 	<h2 id="title">Below are the results from the first frame of each step to show the inner working of the algorithm</h2>

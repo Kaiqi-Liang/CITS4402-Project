@@ -16,6 +16,18 @@ form.addEventListener('submit', async (event) => {
 	const start = form.start.value;
 	const end = form.end.value;
 
+	const areaUpperTh = form.areaUpperTh.value;
+	const areaLowerTh = form.areaLowerTh.value;
+
+	const extendUpperTh = form.extendUpperTh.value;
+	const extendLowerTh = form.extendLowerTh.value;
+
+	const majorAxisUpperTh = form.majorAxisUpperTh.value;
+	const majorAxisLowerTh = form.majorAxisLowerTh.value;
+
+	const eccentricityUpperTh = form.eccentricityUpperTh.value;
+	const eccentricityLowerTh = form.eccentricityLowerTh.value;
+
 	const res = await fetch('http://127.0.0.1:5000', {
 		method: 'POST',
 		headers: {
@@ -25,6 +37,14 @@ form.addEventListener('submit', async (event) => {
 			folder,
 			start,
 			end,
+			areaUpperTh,
+			areaLowerTh,
+			extendUpperTh,
+			extendLowerTh,
+			majorAxisUpperTh,
+			majorAxisLowerTh,
+			eccentricityUpperTh,
+			eccentricityLowerTh,
 		}),
 	});
 	const data = await res.json();

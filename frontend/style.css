@@ -52,10 +52,23 @@ input[type=submit]:hover {
 }
 
 label {
-	width: 100px;
+	width: 250px;
 	display: inline-block;
 }
 
 form > div {
 	margin: 10px 0;
+}
+
+.thresholds {
+	display: flex;
+	align-items: center;
+}
+
+.thresholds > input {
+	margin: 0 5px;
+}
+
+.margin-right {
+	margin-right: 20px;
 }
