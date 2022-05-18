@@ -1,6 +1,59 @@
 import numpy as np
 import scipy as sp
 
+# Tracking Phase
+
+def init_tracks(frames):
+    '''
+	Input: for each frame index n from 1 to N-1, this step takes as input a list of clusters, each cluster containing centroid and bounding box information
+	Output: for each frame index n from 1 to N-1, this step outputs initalized cluster information containig an initialized state vector and track ID. This will be passed into 'predict' 
+	'''
+    tracksFrames = []
+    for frame in frames:
+        max_ID = 0
+        tracks = []
+        for cluster in frame:
+            track_ID = max_ID
+            state = np.array([cluster[0][0], cluster[0][1], 0, 0, 0, 0])
+            cov = np.diag([1] * 6)
+            cluster_info = (track_ID, state, cov)
+            max_ID += 1
+            tracks.append(cluster_info)
+        tracksFrames.append((frame, tracks))
+    # print(len(output[2][1]))
+    return tracksFrames
+
+def predict(tracksFrames):
+    '''
+	Input: for each frame index n from 1 to N-1, this step takes as input tuple of track ID and *****initialized***** state vector for each candidate cluster 
+	Output: for each frame index n from 1 to N-1, this step outputs tuple of track ID and *****predicted***** state vector for each candidate cluster 
+	'''
+    # Time step between frames
+    tstep = 1
+    # F matrix 
+    F = np.diag([1.0] * 6)
+    np.fill_diagonal(F[:-2,2:], tstep)
+    np.fill_diagonal(F[:-4,4:], (tstep ** 2) / 2)
+    F = np.matrix(F)
+    # Q matrix 
+    Q = np.matrix(np.diag([1] * 6))
+
+    predictedtracksFrames = []
+    for _, tracks in tracksFrames:
+        # This loops over the frames
+        predicted_tracks = []
+        for track in tracks:
+            # This loops over each cluster in each frame 
+            current_state = track[1]
+            current_cov = track[2]
+            future_state = np.matmul(F, current_state.T)
+            future_cov = np.matmul(F, np.matmul(current_cov, F.T)) + Q
+            cluster_info = (track[0], future_state, future_cov)
+            predicted_tracks.append(cluster_info)
+
+        predictedtracksFrames.append((predicted_tracks))
+    return predictedtracksFrames
+
 def track_association(frames):
 
     for hypotheses, gt in frames:
@@ -85,34 +138,3 @@ def nearest_search(unassigned_tracks, previous_frame):
     # append to matched_clusters
     
     return matched_clusters
-
-def init_tracks(frames):
-    max_ID = 0
-    output = []
-    for frame in frames:
-        tracks = []
-        for cluster in frame:
-            track_ID = max_ID
-            state = np.array([cluster[0][0], cluster[0][1], 0, 0, 0, 0])
-            cov = np.diag([1] * 6)
-            cluster_info = (track_ID, state, cov)
-            max_ID += 1
-            tracks.append(cluster_info)
-        output.append((frame, tracks))
-    return output
-
-def predict(tracks):
-    tstep = 1
-    F = np.diag([1.0] * 6)
-    np.fill_diagonal(F[:-2,2:], tstep)
-    np.fill_diagonal(F[:-4,4:], (tstep ** 2) / 2)
-    F = np.matrix(F)
-    Q = np.matrix(np.diag([1] * 6))
-    predicted_state = []
-    for track in tracks:
-        current_state = track[1]
-        P = track[2]
-        future_state = np.matmul(F, current_state.T)
-        future_cov = np.matmul(F, np.matmul(P, F.T)) + Q
-        predicted_state.append((future_state, future_cov))
-    return predicted_state

@@ -15,22 +15,22 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 	start, end = parser.get_frame_range()
 	output = []
 	for n in range(start + 1, end - 1):
-		img1 = parser.load_frame(n - 1)
-		img2 = parser.load_frame(n)
-		img3 = parser.load_frame(n + 1)
+		frame_behind = parser.load_frame(n - 1)
+		frame_center = parser.load_frame(n)
+		frame_front = parser.load_frame(n + 1)
 
 		#Convert from BGR to Greyscale
-		gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-		gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-		gray3 = cv2.cvtColor(img3, cv2.COLOR_BGR2GRAY)
+		gray_behind = cv2.cvtColor(frame_behind, cv2.COLOR_BGR2GRAY)
+		gray_center = cv2.cvtColor(frame_center, cv2.COLOR_BGR2GRAY)
+		gray_front = cv2.cvtColor(frame_front, cv2.COLOR_BGR2GRAY)
 
 		binary_rows = []
-		for i in range(len(gray1) // 30 + 1):
+		for i in range(len(gray_behind) // 30 + 1):
 			binary_cols = []
-			for j in range(len(gray1) // 30 + 1):
-				gray1_split = gray1[30 * i:30 * (i + 1), 30 * j:30 * (j + 1)]
-				gray2_split = gray2[30 * i:30 * (i + 1), 30 * j:30 * (j + 1)]
-				gray3_split = gray3[30 * i:30 * (i + 1), 30 * j:30 * (j + 1)]
+			for j in range(len(gray_behind) // 30 + 1):
+				gray1_split = gray_behind[30 * i:30 * (i + 1), 30 * j:30 * (j + 1)]
+				gray2_split = gray_center[30 * i:30 * (i + 1), 30 * j:30 * (j + 1)]
+				gray3_split = gray_front[30 * i:30 * (i + 1), 30 * j:30 * (j + 1)]
 
 				#(1) Inter-frame differences
 				diff_img_12 = cv2.absdiff(gray2_split, gray1_split)
@@ -51,10 +51,13 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		# merge the 30x30 split images back into 1 binary image
 		binary_image = np.concatenate([[list(itertools.chain(*col)) for col in zip(*row)] for row in binary_rows])
 
-		# append the binary image and the gray image to list
-		output.append((binary_image, gray2, parser.get_gt_centroid(n)))
+		# for each frame append the binary image, the center gray image and center centroid file 
+		# output.append((binary_image, gray_center, parser.get_gt_centroid(n)))
+		output.append((binary_image, gray_center, n))
 
-	plt.title('candidate small object detection')
-	plt.imshow(output[0][0], 'gray')
-	plt.savefig('candidate_detection.jpg')
+
+	# print(np.shape(output))
+	# plt.title('candidate small object detection')
+	# plt.imshow(output[0][0], 'gray')
+	# plt.savefig('candidate_detection.jpg')
 	return output

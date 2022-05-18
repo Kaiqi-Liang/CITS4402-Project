@@ -8,25 +8,30 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 	Input: for each frame index n from 1 to N-1, this step takes as input a binary image representing the candidate small objects.
 	Output: for each frame index n from 1 to N-1, this step outputs the bounding box and centroid of each candidate small object.
 	'''
-	output = []
-	for binary_image, gray_image, _ in frames:
+	for frame in frames:
+		binary_image = frame[0]
+		gray_image = frame[1]
+		#(1) Region Growing: for each frame in frames. Each frame has a binary image and a greyscale image 
+
 		# label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
-		properties = skimage.measure.regionprops(labelled_image)
-		for property in properties:
-			# get centroid of pixels
-			row, col = property.centroid
+		clusters = skimage.measure.regionprops(labelled_image)
+		for cluster in clusters:
+
+			# centroid of cluster 
+			row, col = cluster.centroid
 			row = round(row)
 			col = round(col)
 
-			# put 11 x 11 search window centered around centroid
+			# 11 x 11 search window centered around centroid
 			binary_window = binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)]
 			gray_window = gray_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)]
 
 			gray_binary = gray_window[binary_window]
+
 			if len(gray_binary) <= 1:
 				continue
-
+			
 			# find the pixel mean of window
 			window_mean = np.average(gray_binary)
 			# find standard deviation of window
@@ -35,42 +40,60 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 			# get the upper quantile limit of candidate cluster
 			upper_th = min(sp.stats.norm.ppf(0.995, loc=window_mean, scale=window_std), 255)
 			# get the lower quantile limit of candidate cluster
-			lower_th = sp.stats.norm.ppf(0.005, loc=window_mean, scale=window_std)
+			lower_th = sp.stats.norm.ppf(0.005, loc=window_mean, scale=window_std)			
 
 			# mark the pixels within the quantile interval as being part of candidate cluster in object
+
 			for i, pixels in enumerate(gray_window):
 				for j, pixel in enumerate(pixels):
 					if lower_th <= pixel <= upper_th:
 						binary_window[i,j] = True
 			binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)] = binary_window
 
-	plt.title('region growing')
-	plt.imshow(frames[0][0], 'gray')
-	plt.savefig('region_growing.jpg')
 
-	candidate_small_objects = []
+	# plt.title('region growing')
+	# plt.imshow(frames[0][0], 'gray')
+	# plt.savefig('region_growing.jpg')
+	
+	#(2) Morphological Cues
+	output = [] #list of candiate small objects for each frame 
 	# Threshold values
+	
 	area_lower, area_upper = [2, 11]
 	extent_lower, extent_upper = [0.66, .95]
 	maxis_lower, maxis_upper = [2, 7]
 	eccentricity_lower, eccentricity_upper = [0.80, 0.9]
-	for binary_image, _, gt in frames:
-		# label connected regions in binary image
+
+	for frame in frames:
+		candidate_small_objects = [] #candidate small objects in each frame
+		binary_image = frame[0]
+		# label connected regions in now 'grown' binary image
 		labelled_image = skimage.measure.label(binary_image)
 
-		properties = skimage.measure.regionprops(labelled_image)
-		for property in properties:
-			area = property.area
-			extent = area / property.area_bbox
-			maxis = property.axis_major_length
-			eccentricity = property.eccentricity
-			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
-				candidate_small_objects.append((property.centroid, property.bbox))
-		
-		print(len(candidate_small_objects), len(gt))
+		clusters = skimage.measure.regionprops(labelled_image)
+		for cluster in clusters:
+			area = cluster.area
+			extent = area / cluster.area_bbox
+			maxis = cluster.axis_major_length
+			eccentricity = cluster.eccentricity
 
+			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
+				candidate_small_objects.append((cluster.centroid, cluster.bbox))
+		
 		output.append(candidate_small_objects)
+
 	return output
+
+
+
+
+
+
+
+
+
+
+
 
 		# intersection over union
 		# for gt_box in gt:
