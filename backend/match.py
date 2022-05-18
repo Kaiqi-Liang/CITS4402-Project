@@ -2,15 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp 
 import skimage
+import cv2
 
-def candidate_match_discrimination(frames: list[np.ndarray]):
+def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float, float], extendTh: tuple[float, float], majorAxisTh: tuple[float, float], eccentricityTh: tuple[float, float]):
 	'''
 	Input: for each frame index n from 1 to N-1, this step takes as input a binary image representing the candidate small objects.
 	Output: for each frame index n from 1 to N-1, this step outputs the bounding box and centroid of each candidate small object.
 	'''
-	for frame in frames:
-		binary_image = frame[0]
-		gray_image = frame[1]
+	for _, gray_image, binary_image, _ in frames:
 		#(1) Region Growing: for each frame in frames. Each frame has a binary image and a greyscale image 
 
 		# label connected regions in binary image
@@ -29,9 +28,10 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 
 			gray_binary = gray_window[binary_window]
 
-			if len(gray_binary) <= 1:
+			# the objects being detected are quite small, so we set a higher thresholds that any regions that are smaller than 2 pixels are ruled out
+			if len(gray_binary) <= 2:
 				continue
-			
+
 			# find the pixel mean of window
 			window_mean = np.average(gray_binary)
 			# find standard deviation of window
@@ -54,19 +54,20 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 	# plt.title('region growing')
 	# plt.imshow(frames[0][0], 'gray')
 	# plt.savefig('region_growing.jpg')
-	
-	#(2) Morphological Cues
-	output = [] #list of candiate small objects for each frame 
-	# Threshold values
-	
-	area_lower, area_upper = [2, 11]
-	extent_lower, extent_upper = [0.66, .95]
-	maxis_lower, maxis_upper = [2, 7]
-	eccentricity_lower, eccentricity_upper = [0.80, 0.9]
+	# plt.show()
 
-	for frame in frames:
+	#(2) Morphological Cues
+	output = [] #list of candidate small objects for each frame 
+
+	# Threshold values
+	area_lower, area_upper = areaTh
+	extent_lower, extent_upper = extendTh
+	major_axis_lower, major_axis_upper = majorAxisTh
+	eccentricity_lower, eccentricity_upper = eccentricityTh
+
+	for original_image, _, binary_image, frame in frames:
+		image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
 		candidate_small_objects = [] #candidate small objects in each frame
-		binary_image = frame[0]
 		# label connected regions in now 'grown' binary image
 		labelled_image = skimage.measure.label(binary_image)
 
@@ -74,12 +75,16 @@ def candidate_match_discrimination(frames: list[np.ndarray]):
 		for cluster in clusters:
 			area = cluster.area
 			extent = area / cluster.area_bbox
-			maxis = cluster.axis_major_length
+			major_axis = cluster.axis_major_length
 			eccentricity = cluster.eccentricity
 
-			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and maxis_lower <= maxis <= maxis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
+			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and major_axis_lower <= major_axis <= major_axis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
 				candidate_small_objects.append((cluster.centroid, cluster.bbox))
-		
+				min_row, min_col, max_row, max_col = cluster.bbox
+				original_image
+				cv2.rectangle(image, (min_row, min_col), (max_row, max_col), (255, 0, 0))
+		plt.imshow(image)
+		plt.savefig(f'{frame}.jpg')
 		output.append(candidate_small_objects)
 
 	return output

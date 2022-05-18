@@ -14,10 +14,10 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 	'''
 	start, end = parser.get_frame_range()
 	output = []
-	for n in range(start + 1, end - 1):
-		frame_behind = parser.load_frame(n - 1)
-		frame_center = parser.load_frame(n)
-		frame_front = parser.load_frame(n + 1)
+	for frame in range(start + 1, end - 1):
+		frame_behind = parser.load_frame(frame - 1)
+		frame_center = parser.load_frame(frame)
+		frame_front = parser.load_frame(frame + 1)
 
 		#Convert from BGR to Greyscale
 		gray_behind = cv2.cvtColor(frame_behind, cv2.COLOR_BGR2GRAY)
@@ -36,7 +36,7 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 				diff_img_12 = cv2.absdiff(gray2_split, gray1_split)
 				diff_img_23 = cv2.absdiff(gray3_split, gray2_split)
 
-				#(2) Thresholding: convert greyscale to binary
+				#(2) Threshold: convert greyscale to binary
 				PFA = 0.05
 				th_12 = -np.log(PFA) * np.mean(diff_img_12)
 				th_23 = -np.log(PFA) * np.mean(diff_img_23)
@@ -51,12 +51,9 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		# merge the 30x30 split images back into 1 binary image
 		binary_image = np.concatenate([[list(itertools.chain(*col)) for col in zip(*row)] for row in binary_rows])
 
-		# for each frame append the binary image, the center gray image and center centroid file 
-		# output.append((binary_image, gray_center, parser.get_gt_centroid(n)))
-		output.append((binary_image, gray_center, n))
+		# for each frame append the binary image, the center gray image and the frame number
+		output.append((frame_center, gray_center, binary_image, frame))
 
-
-	# print(np.shape(output))
 	# plt.title('candidate small object detection')
 	# plt.imshow(output[0][0], 'gray')
 	# plt.savefig('candidate_detection.jpg')

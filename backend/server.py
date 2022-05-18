@@ -14,16 +14,20 @@ CORS(APP)
 
 @APP.route('/', methods=['POST'])
 def input_frames():
-	folder = request.get_json()['folder']
+	data = request.get_json()
+	folder = data['folder']
 	try:
-		frame_range = int(request.get_json()['start']), int(request.get_json()['end'])
+		frame_range = int(data['start']), int(data['end'])
+		areaTh = float(data['areaUpperTh']), float(data['areaLowerTh'])
+		extendTh = float(data['extendUpperTh']), float(data['extendLowerTh'])
+		majorAxisTh = float(data['majorAxisUpperTh']), float(data['majorAxisLowerTh'])
+		eccentricityTh = float(data['eccentricityUpperTh']), float(data['eccentricityLowerTh'])
 	except ValueError:
 		frame_range = None
 	try:
 		parser = Parser(folder, '{:06}.jpg', frame_range)
 		output = candidate_small_objects_detection(parser)
-		output = candidate_match_discrimination(output)
-		track_association(output)
+		output = candidate_match_discrimination(output, areaTh, extendTh, majorAxisTh, eccentricityTh)
 	except:
 		return {
 			'message': 'something went wrong'
