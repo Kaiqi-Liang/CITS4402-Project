@@ -1,3 +1,13 @@
+const intermediate = document.getElementById('intermediate');
+const button = document.getElementById('button');
+button.onclick = () => {
+	intermediate.style.display = 'flex';
+	const detection = document.getElementById('detection');
+	const match = document.getElementById('match');
+	match.src = '../region_growing.jpg';
+	detection.src = '../candidate_detection.jpg';
+};
+
 const form = document.forms.range;
 form.addEventListener('submit', async (event) => {
 	event.preventDefault();
@@ -5,12 +15,10 @@ form.addEventListener('submit', async (event) => {
 	spinner.style.display = 'block';
 	spinner.src = 'spinner.svg';
 
-	const title = document.getElementById('title');
-	const detection = document.getElementById('detection');
-	const match = document.getElementById('match');
-	title.style.display = 'none';
-	match.style.display = 'none';
-	detection.style.display = 'none';
+	const tracking = document.getElementById('tracking');
+	const items = [tracking, button];
+	items.forEach((image) => image.style.display = 'none');
+	intermediate.style.display = 'none';
 
 	const folder = form.folder.value;
 	const start = form.start.value;
@@ -58,10 +66,12 @@ form.addEventListener('submit', async (event) => {
 			snackbar.style.display = 'none';
 		}, 2000);
 	} else {
-		title.style.display = 'block';
-		detection.src = '../candidate_detection.jpg';
-		detection.style.display = 'block';
-		match.src = '../region_growing.jpg';
-		match.style.display = 'block';
+		items.forEach((image) => image.style.display = 'block');
+		let frame = parseInt(start);
+		tracking.src = `../${++frame}.jpg`;
+		const interval = setInterval(() => {
+			tracking.src = `../${frame++}.jpg`;
+			if (frame == end - 1) clearInterval(interval);
+		}, 500);
 	}
 });

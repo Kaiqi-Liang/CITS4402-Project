@@ -32,9 +32,9 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 			if len(gray_binary) <= 2:
 				continue
 
-			# find the pixel mean of window
+			# find the pixel mean of the window
 			window_mean = np.average(gray_binary)
-			# find standard deviation of window
+			# find standard deviation of the window
 			window_std = np.std(gray_binary)
 
 			# get the upper quantile limit of candidate cluster
@@ -50,9 +50,8 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 						binary_window[i,j] = True
 			binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)] = binary_window
 
-
 	# plt.title('region growing')
-	# plt.imshow(frames[0][0], 'gray')
+	# plt.imshow(frames[0][2], 'gray')
 	# plt.savefig('region_growing.jpg')
 	# plt.show()
 
@@ -82,9 +81,10 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 				candidate_small_objects.append((cluster.centroid, cluster.bbox))
 				min_row, min_col, max_row, max_col = cluster.bbox
 				original_image
-				cv2.rectangle(image, (min_row, min_col), (max_row, max_col), (255, 0, 0))
-		plt.imshow(image)
-		plt.savefig(f'{frame}.jpg')
+				cv2.rectangle(image, (min_row, min_col), (max_row, max_col), (255, 0, 0), 2)
+		# plt.title(f'frame {frame}')
+		# plt.imshow(image)
+		# plt.savefig(f'{frame}.jpg')
 		output.append(candidate_small_objects)
 
 	return output
