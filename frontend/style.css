@@ -19,8 +19,12 @@ form {
 	align-items: center;
 }
 
-#spinner, #tracking, #button, #intermediate, #title, #alert {
+#button, #intermediate, #alert, img {
 	display: none;
+}
+
+#intermediate > img {
+	display: block;
 }
 
 #button, input, #alert {
@@ -29,7 +33,6 @@ form {
 }
 
 #button {
-	min-width: 150px;
 	margin-top: 20px;
 }
 
@@ -51,14 +54,14 @@ input {
 .button {
 	border: none;
 	background: #6718cf;
-	cursor: pointer;
 	padding: 0 6px;
 	width: 10vw;
-	min-width: 100px;
+	min-width: 200px;
 }
 
-.button:hover {
+.button:hover:not([disabled]) {
 	background: #9e77f3;
+	cursor: pointer;
 }
 
 label {

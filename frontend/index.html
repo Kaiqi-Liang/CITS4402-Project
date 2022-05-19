@@ -18,54 +18,59 @@
 		<div>
 			<label>Frame Range</label>
 			<input name="start" type="number" value="1">
-			<input name="end" type="number" value="4">
+			<input name="end" type="number" value="42">
 		</div>
 		<div class="thresholds">
 			<label>Area Thresholds</label>
+			<span>0.00</span>
+			<input type="range" name="areaUpperTh" min="0" max="50" step="10">
+			<span class="margin-right">50.0</span>
+			<span>50.0</span>
+			<input type="range" name="areaLowerTh" min="50" max="100" step="10">
 			<span>100.</span>
-			<input type="range" name="areaUpperTh" min="100" max="300" step="10">
-			<span class="margin-right">300.</span>
-			<span>300.</span>
-			<input type="range" name="areaLowerTh" min="300" max="500" step="10">
-			<span>500.</span>
 		</div>
 		<div class="thresholds">
-			<label>Extend Thresholds</label>
-			<span>0.30</span>
-			<input type="range" name="extendUpperTh" min="0.3" max="0.6" step="0.01">
+			<label>Extent Thresholds</label>
+			<span>0.40</span>
+			<input type="range" name="extentUpperTh" min="0.4" max="0.6" step="0.01">
 			<span class="margin-right">0.60</span>
 			<span>0.80</span>
-			<input type="range" name="extendLowerTh" min="0.8" max="1" step="0.01">
+			<input type="range" name="extentLowerTh" min="0.8" max="1" step="0.01">
 			<span>1.00</span>
 		</div>
 		<div class="thresholds">
 			<label>Major Axis Thresholds</label>
-			<span>5.00</span>
-			<input type="range" name="majorAxisUpperTh" min="5" max="15" step="1">
-			<span class="margin-right">15.0</span>
-			<span>40.0</span>
-			<input type="range" name="majorAxisLowerTh" min="40" max="60" step="1">
-			<span>60.0</span>
+			<span>2.50</span>
+			<input type="range" name="majorAxisUpperTh" min="2.5" max="10" step="1">
+			<span class="margin-right">10.0</span>
+			<span>10.0</span>
+			<input type="range" name="majorAxisLowerTh" min="10" max="20" step="1">
+			<span>20.0</span>
 		</div>
 		<div class="thresholds">
 			<label>Eccentricity Thresholds</label>
 			<span>0.30</span>
 			<input type="range" name="eccentricityUpperTh" min="0.3" max="0.5" step="0.01">
 			<span class="margin-right">0.50</span>
-			<span>0.50</span>
-			<input type="range" name="eccentricityLowerTh" min="0.5" max="1" step="0.01">
+			<span>0.60</span>
+			<input type="range" name="eccentricityLowerTh" min="0.6" max="1" step="0.01">
 			<span>1.00</span>
 		</div>
-		<input class="button" type="submit" value="Start Tracking">
+		<input id="track" class="button" type="submit" value="Start Tracking">
+		<input id="calibration" class="button" type="submit" value="Thresholds Calibration">
 	</form>
 	<img id="spinner" src="" alt="spinner">
+	<img id="area" src="" alt="histogram">
+	<img id="extent" src="" alt="histogram">
+	<img id="majorAxis" src="" alt="histogram">
+	<img id="eccentricity" src="" alt="histogram">
 	<img id="tracking" src="" alt="tracking">
 	<button id="button" class="button">Show intermediate state</button>
 	<div id="intermediate">
 		<h2>Below are the results from the first frame of each step to show the inner working of the algorithm</h2>
 		<img id="detection" src="" alt="candidate small object detection">
 		<img id="match" src="" alt="region growing">
-		<div id="alert"></div>
 	</div>
+	<div id="alert"></div>
 </body>
 </html>
