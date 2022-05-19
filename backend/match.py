@@ -80,15 +80,12 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and major_axis_lower <= major_axis <= major_axis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
 				candidate_small_objects.append((cluster.centroid, cluster.bbox))
 				min_row, min_col, max_row, max_col = cluster.bbox
-				original_image
-				cv2.rectangle(image, (min_row, min_col), (max_row, max_col), (255, 0, 0), 2)
-		print(frame)
-		plt.title(f'frame {frame}')
-		plt.imshow(image)
+				# cv2.rectangle(image, (min_row, min_col), (max_row, max_col), (255, 0, 0), 2)
+		# plt.title(f'frame {frame}')
+		# plt.imshow(image)
 		# plt.savefig(f'{frame}.jpg')
-		plt.show()
+		# plt.show()
 		output.append(candidate_small_objects)
-
 	return output
 
 
