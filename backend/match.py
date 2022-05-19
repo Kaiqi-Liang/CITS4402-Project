@@ -82,9 +82,11 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 				min_row, min_col, max_row, max_col = cluster.bbox
 				original_image
 				cv2.rectangle(image, (min_row, min_col), (max_row, max_col), (255, 0, 0), 2)
-		# plt.title(f'frame {frame}')
-		# plt.imshow(image)
+		print(frame)
+		plt.title(f'frame {frame}')
+		plt.imshow(image)
 		# plt.savefig(f'{frame}.jpg')
+		plt.show()
 		output.append(candidate_small_objects)
 
 	return output

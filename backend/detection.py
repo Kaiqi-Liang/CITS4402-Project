@@ -14,10 +14,10 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 	'''
 	start, end = parser.get_frame_range()
 	output = []
-	for frame in range(start + 1, end - 1):
-		frame_behind = parser.load_frame(frame - 1)
+	for frame in range(start + 10, end - 10, 10):
+		frame_behind = parser.load_frame(frame - 10)
 		frame_center = parser.load_frame(frame)
-		frame_front = parser.load_frame(frame + 1)
+		frame_front = parser.load_frame(frame + 10)
 
 		#Convert from BGR to Greyscale
 		gray_behind = cv2.cvtColor(frame_behind, cv2.COLOR_BGR2GRAY)
@@ -56,5 +56,6 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 
 	# plt.title('candidate small object detection')
 	# plt.imshow(output[0][2], 'gray')
+	# plt.show()
 	# plt.savefig('candidate_detection.jpg')
 	return output
