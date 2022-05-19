@@ -54,8 +54,7 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 		# for each frame append the binary image, the center gray image and the frame number
 		output.append((frame_center, gray_center, binary_image, frame))
 
-	# plt.title('candidate small object detection')
-	# plt.imshow(output[0][2], 'gray')
-	# plt.show()
-	# plt.savefig('candidate_detection.jpg')
+	plt.title('candidate small object detection')
+	plt.imshow(output[0][2], 'gray')
+	plt.savefig('candidate_detection.jpg')
 	return output

@@ -33,7 +33,7 @@ def init_tracks(frameCandidateClusters):
     initializedtracks = []
     for cluster in frameCandidateClusters[0]:
         track_ID = max_ID
-        state = np.array([cluster[0][0], cluster[0][1], 0, 0, 0, 0])
+        state = np.array([cluster[0], cluster[1], 0, 0, 0, 0])
         cov = np.diag([1] * 6)
         max_ID += 1
         initializedtracks.append((track_ID, state, cov))

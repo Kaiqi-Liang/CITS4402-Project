@@ -8,27 +8,75 @@ button.onclick = () => {
 	detection.src = '../candidate_detection.jpg';
 };
 
-const form = document.forms.range;
-form.addEventListener('submit', async (event) => {
-	event.preventDefault();
-	const spinner = document.getElementById('spinner');
+const area = document.getElementById('area');
+const extent = document.getElementById('extent');
+const majorAxis = document.getElementById('majorAxis');
+const eccentricity = document.getElementById('eccentricity');
+const histogarms = [area, extent, majorAxis, eccentricity];
+const tracking = document.getElementById('tracking');
+const trackingButton = [tracking, button];
+const spinner = document.getElementById('spinner');
+const items = [...histogarms, ...trackingButton, intermediate];
+const snackbar = document.getElementById('alert');
+
+const buttonClick = () => {
 	spinner.style.display = 'block';
 	spinner.src = 'spinner.svg';
-
-	const tracking = document.getElementById('tracking');
-	const items = [tracking, button];
-	items.forEach((image) => image.style.display = 'none');
-	intermediate.style.display = 'none';
-
+	document.querySelectorAll('.button').forEach((button) => button.setAttribute('disabled', ''));
 	const folder = form.folder.value;
-	const start = form.start.value;
+	const start = form.start.value ? form.start.value : 1;
 	const end = form.end.value;
+	return [folder, start, end];
+};
+
+const resolve = () => {
+	spinner.style.display = 'none';
+	document.querySelectorAll('.button').forEach((button) => button.removeAttribute('disabled'));
+};
+
+const form = document.forms.range;
+document.getElementById('calibration').addEventListener('click', async (event) => {
+	event.preventDefault();
+	const [folder, start, end] = buttonClick();
+	items.forEach((histogarm) => histogarm.style.display = 'none');
+
+	const res = await fetch('http://127.0.0.1:5000/calibration', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			folder,
+			start,
+			end,
+		}),
+	});
+	const data = await res.json();
+	resolve();
+	if (!res.ok) {
+		snackbar.style.display = 'flex';
+		snackbar.innerText = data.message;
+		setTimeout(() => {
+			snackbar.style.display = 'none';
+		}, 2000);
+	} else {
+		histogarms.forEach((histogarm) => {
+			histogarm.style.display = 'block'
+			histogarm.src = `../${histogarm.id}.jpg`;
+		});
+	}
+});
+
+document.getElementById('track').addEventListener('click', async (event) => {
+	event.preventDefault();
+	const [folder, start, end] = buttonClick();
+	items.forEach((histogarm) => histogarm.style.display = 'none');
 
 	const areaUpperTh = form.areaUpperTh.value;
 	const areaLowerTh = form.areaLowerTh.value;
 
-	const extendUpperTh = form.extendUpperTh.value;
-	const extendLowerTh = form.extendLowerTh.value;
+	const extentUpperTh = form.extentUpperTh.value;
+	const extentLowerTh = form.extentLowerTh.value;
 
 	const majorAxisUpperTh = form.majorAxisUpperTh.value;
 	const majorAxisLowerTh = form.majorAxisLowerTh.value;
@@ -36,7 +84,7 @@ form.addEventListener('submit', async (event) => {
 	const eccentricityUpperTh = form.eccentricityUpperTh.value;
 	const eccentricityLowerTh = form.eccentricityLowerTh.value;
 
-	const res = await fetch('http://127.0.0.1:5000', {
+	const res = await fetch('http://127.0.0.1:5000/track', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -47,8 +95,8 @@ form.addEventListener('submit', async (event) => {
 			end,
 			areaUpperTh,
 			areaLowerTh,
-			extendUpperTh,
-			extendLowerTh,
+			extentUpperTh,
+			extentLowerTh,
 			majorAxisUpperTh,
 			majorAxisLowerTh,
 			eccentricityUpperTh,
@@ -56,22 +104,28 @@ form.addEventListener('submit', async (event) => {
 		}),
 	});
 	const data = await res.json();
-	spinner.style.display = 'none';
-
+	resolve();
 	if (!res.ok) {
-		const snackbar = document.getElementById('alert');
 		snackbar.style.display = 'flex';
 		snackbar.innerText = data.message;
 		setTimeout(() => {
 			snackbar.style.display = 'none';
 		}, 2000);
 	} else {
-		items.forEach((image) => image.style.display = 'block');
-		let frame = parseInt(start);
-		tracking.src = `../${++frame}.jpg`;
+		trackingButton.forEach((image) => image.style.display = 'block');
+		let frame = parseInt(start) + 10;
+		tracking.src = `../${frame}.jpg`;
 		const interval = setInterval(() => {
-			tracking.src = `../${frame++}.jpg`;
-			if (frame == end - 1) clearInterval(interval);
+			const finishTrackingDisplay = () => {
+				clearInterval(interval);
+				tracking.src = '../graph.jpg';
+			};
+			tracking.src = `../${frame += 10}.jpg`;
+			tracking.onerror = () => {
+				tracking.src = `../${frame -= 10}.jpg`;
+				finishTrackingDisplay();
+			};
+			if (end && frame > end - 20) finishTrackingDisplay();
 		}, 500);
 	}
 });
