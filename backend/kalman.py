@@ -149,22 +149,22 @@ def updateKalman(predictions, measurements):
 
     return
     
-#for unassigned track ID's, i.e. gt clusters with no match in hypothesis     
-# def nearest_search(unassigned_tracks, frame, previous_frame):
-#     res = []
-#     for gt_centroid in unassigned_tracks:
-#         _, grey_image2, _ = previous_frame
-#         _, grey_image1, _ = frame
-#         row, column = gt_centroid
-#         template = grey_image1[row - 2 : row + 2, column - 2 : column + 2]
-#         im_area = grey_image2[row - 3 : row + 3, column - 3 : column + 3]
-#         h, w = template.shape[::]
-#         res = cv2.matchTemplate(gt_image, template, cv2.TM_SQDIFF) 
-#         if res > 70:
-#             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)   
-#             top_left = min_loc
-#             bottom_right = (top_left[0] + w, top_left[1 + h]) 
-#             hypothesis_centroid = gt_centroid
-#         res.append((hypothesis_centroid, gt_centroid))
-#     return res
+# for unassigned track ID's, i.e. gt clusters with no match in hypothesis     
+def nearest_search(unassigned_tracks, frame, previous_frame):
+    res = []
+    for gt_centroid in unassigned_tracks:
+        _, grey_image2, _ = previous_frame
+        _, grey_image1, _ = frame
+        row, column = gt_centroid
+        template = grey_image1[row - 2 : row + 2, column - 2 : column + 2]
+        im_area = grey_image2[row - 3 : row + 3, column - 3 : column + 3]
+        h, w = template.shape[::]
+        res = cv2.matchTemplate(im_area, template, cv2.TM_SQDIFF) 
+        if res < 300000:
+            # min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)   
+            # top_left = min_loc
+            # bottom_right = (top_left[0] + w, top_left[1 + h]) 
+            hypothesis_centroid = gt_centroid
+        res.append((hypothesis_centroid, gt_centroid))
+    return res
 
