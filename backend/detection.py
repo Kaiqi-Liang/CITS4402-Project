@@ -7,7 +7,7 @@ from parser import Parser
 import itertools
 import cv2
 
-def candidate_small_objects_detection(parser: Parser, frames: int = 1) -> list[np.ndarray]:
+def candidate_small_objects_detection(parser: Parser, frames: int = 1) -> list:
 	'''
 	Input: for each frame index n from 1 to N-1, this step takes as input the frames at index n-1, n and n+1
 	Output: for each frame index n from 1 to N-1, this step outputs a binary image representing candidate small objects

@@ -5,9 +5,7 @@ from detection import candidate_small_objects_detection
 from match import candidate_match_discrimination, thresholds_calibration
 from kalman import kalman
 import matplotlib
-
 matplotlib.use('Agg')
-matplotlib.pyplot.axis('off')
 
 APP = Flask(__name__)
 CORS(APP)
@@ -33,6 +31,7 @@ def calibration():
 
 @APP.route('/track', methods=['POST'])
 def start_tracking():
+	matplotlib.pyplot.axis('off')
 	data = request.get_json()
 	folder = data['folder']
 	frames = int(data['frames'])

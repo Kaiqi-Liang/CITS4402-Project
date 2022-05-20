@@ -9,7 +9,7 @@ import scipy as sp
 import skimage
 import cv2
 
-def region_growing(frames):
+def region_growing(frames: list):
 	'''
 	Input: for each frame index n from 1 to N-1, this step takes as input a binary image representing the candidate small objects.
 	Output: for each frame index n from 1 to N-1, this step outputs a binary image with candidate small object areas grown based on a 11x11 search window 
@@ -97,10 +97,14 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 		for centroid, bbox, area, extent, major_axis, eccentricity in candidate_small_objects[i]:
 			if area_lower <= area <= area_upper and extent_lower <= extent <= extent_upper and major_axis_lower <= major_axis <= major_axis_upper and eccentricity_lower <= eccentricity <= eccentricity_upper:
 				centroids.append(centroid)
-		output.append([image, centroids, frame])
+		output.append((image, centroids, frame))
 	return output
 
-def thresholds_calibration(parser: Parser, frames):
+def thresholds_calibration(parser: Parser, frames: list):
+	'''
+	Input: for each frame index n from 1 to N-1, this step takes as input a binary image representing the candidate small objects.
+	Output: Density plot for area, extent, major axis and eccentricity
+	'''
 	candidate_small_objects = region_growing(frames)
 	matches = []
 	for i, frame in enumerate(frames):
