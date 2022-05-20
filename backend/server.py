@@ -37,6 +37,7 @@ def start_tracking():
 	data = request.get_json()
 	folder = data['folder']
 	frames = int(data['frames'])
+	cost = int(data['cost'])
 	areaTh = float(data['areaUpperTh']), float(data['areaLowerTh'])
 	extentTh = float(data['extentUpperTh']), float(data['extentLowerTh'])
 	majorAxisTh = float(data['majorAxisUpperTh']), float(data['majorAxisLowerTh'])

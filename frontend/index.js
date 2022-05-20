@@ -74,6 +74,8 @@ document.getElementById('track').addEventListener('click', async (event) => {
 	const [folder, frames, start, end] = buttonClick();
 	items.forEach((histogarm) => histogarm.style.display = 'none');
 
+	const cost = form.cost.value;
+
 	const areaUpperTh = form.areaUpperTh.value;
 	const areaLowerTh = form.areaLowerTh.value;
 
@@ -96,6 +98,7 @@ document.getElementById('track').addEventListener('click', async (event) => {
 			frames,
 			start,
 			end,
+			cost,
 			areaUpperTh,
 			areaLowerTh,
 			extentUpperTh,
