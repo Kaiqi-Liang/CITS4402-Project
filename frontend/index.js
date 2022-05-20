@@ -132,6 +132,6 @@ document.getElementById('track').addEventListener('click', async (event) => {
 				finishTrackingDisplay();
 			};
 			if (end && frame > end - frames) finishTrackingDisplay();
-		}, 500);
+		}, 1000);
 	}
 });

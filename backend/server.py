@@ -2,8 +2,8 @@ from flask import Flask, request
 from flask_cors import CORS
 from parser import Parser
 from detection import candidate_small_objects_detection
-from match import candidate_match_discrimination, region_growing, thresholds_calibration
-from kalman import track_association
+from match import candidate_match_discrimination, thresholds_calibration
+from kalman import kalman
 import matplotlib
 
 matplotlib.use('Agg')
@@ -24,7 +24,6 @@ def calibration():
 	try:
 		parser = Parser(folder, '{:06}.jpg', frame_range)
 		frameBinary = candidate_small_objects_detection(parser, frames)
-		frameBinary = region_growing(frameBinary)
 		thresholds_calibration(parser, frameBinary)
 	except:
 		return {
@@ -37,7 +36,6 @@ def start_tracking():
 	data = request.get_json()
 	folder = data['folder']
 	frames = int(data['frames'])
-	cost = int(data['cost'])
 	areaTh = float(data['areaUpperTh']), float(data['areaLowerTh'])
 	extentTh = float(data['extentUpperTh']), float(data['extentLowerTh'])
 	majorAxisTh = float(data['majorAxisUpperTh']), float(data['majorAxisLowerTh'])
@@ -47,10 +45,21 @@ def start_tracking():
 	except ValueError:
 		frame_range = None
 	try:
+		cost = int(data['cost'])
+	except ValueError:
+		cost = None
+	try:
+		# Parser to read files in
 		parser = Parser(folder, '{:06}.jpg', frame_range)
+
+		# Small object detection to output binary image of candidate moving objects
 		frameBinary = candidate_small_objects_detection(parser, frames)
-		frameBinary = region_growing(frameBinary)
-		output = candidate_match_discrimination(frameBinary, areaTh, extentTh, majorAxisTh, eccentricityTh)
+
+		# Candidate match discrimination to apply morphological cues to binary image
+		hypothesis = candidate_match_discrimination(frameBinary, areaTh, extentTh, majorAxisTh, eccentricityTh)
+
+		# Kalman to track candidate small objects across frames 
+		kalman(hypothesis, cost)
 	except:
 		return {
 			'message': 'something went wrong'
@@ -58,4 +67,4 @@ def start_tracking():
 	return {}
 
 if __name__ == '__main__':
-	APP.run(debug=True)
+	APP.run()

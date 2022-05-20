@@ -22,3 +22,8 @@ conda activate name_not_taken
 python backend/server.py
 ```
 7. Open the file [frontend/index.html](frontend/index.html) in a browser
+
+## Assumptions
+Frame interval is one of the hyperparameters that can be set in the GUI. Default is 1 as is necessary to stabilise the Kalman filter but 10 demonstrated stronger results for candidate detection and discrimination.
+
+Cost of non-assignment, that is the cost of assigning a pseudo track to a hypothesis or a pseudo hypothesis to a track, is a positive hyperparameter that can be set in the GUI. If no cost is provided, the default cost is set to slightly larger than the mean of euclidean distances calculated in track association. This is to ensure that the probability of non-assignment is low.

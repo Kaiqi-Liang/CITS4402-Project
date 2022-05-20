@@ -12,7 +12,6 @@ def candidate_small_objects_detection(parser: Parser, frames: int = 1) -> list[n
 	Input: for each frame index n from 1 to N-1, this step takes as input the frames at index n-1, n and n+1
 	Output: for each frame index n from 1 to N-1, this step outputs a binary image representing candidate small objects
 	'''
-
 	# Read in relevant frames using the data loader 
 	start, end = parser.get_frame_range()
 	output = []
@@ -21,7 +20,7 @@ def candidate_small_objects_detection(parser: Parser, frames: int = 1) -> list[n
 		frame_center = parser.load_frame(frame)
 		frame_front = parser.load_frame(frame + frames)
 
-		#Convert from BGR to Greyscale
+		# Convert from BGR to Greyscale
 		gray_behind = cv2.cvtColor(frame_behind, cv2.COLOR_BGR2GRAY)
 		gray_center = cv2.cvtColor(frame_center, cv2.COLOR_BGR2GRAY)
 		gray_front = cv2.cvtColor(frame_front, cv2.COLOR_BGR2GRAY)
