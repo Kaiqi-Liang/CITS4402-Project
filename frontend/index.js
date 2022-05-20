@@ -24,9 +24,10 @@ const buttonClick = () => {
 	spinner.src = 'spinner.svg';
 	document.querySelectorAll('.button').forEach((button) => button.setAttribute('disabled', ''));
 	const folder = form.folder.value;
+	const frames = form.frames.value ? parseInt(form.frames.value) : 1;
 	const start = form.start.value ? form.start.value : 1;
 	const end = form.end.value;
-	return [folder, start, end];
+	return [folder, frames, start, end];
 };
 
 const resolve = () => {
@@ -37,7 +38,7 @@ const resolve = () => {
 const form = document.forms.range;
 document.getElementById('calibration').addEventListener('click', async (event) => {
 	event.preventDefault();
-	const [folder, start, end] = buttonClick();
+	const [folder, frames, start, end] = buttonClick();
 	items.forEach((histogarm) => histogarm.style.display = 'none');
 
 	const res = await fetch('http://127.0.0.1:5000/calibration', {
@@ -47,6 +48,7 @@ document.getElementById('calibration').addEventListener('click', async (event) =
 		},
 		body: JSON.stringify({
 			folder,
+			frames,
 			start,
 			end,
 		}),
@@ -69,7 +71,7 @@ document.getElementById('calibration').addEventListener('click', async (event) =
 
 document.getElementById('track').addEventListener('click', async (event) => {
 	event.preventDefault();
-	const [folder, start, end] = buttonClick();
+	const [folder, frames, start, end] = buttonClick();
 	items.forEach((histogarm) => histogarm.style.display = 'none');
 
 	const areaUpperTh = form.areaUpperTh.value;
@@ -91,6 +93,7 @@ document.getElementById('track').addEventListener('click', async (event) => {
 		},
 		body: JSON.stringify({
 			folder,
+			frames,
 			start,
 			end,
 			areaUpperTh,
@@ -113,19 +116,19 @@ document.getElementById('track').addEventListener('click', async (event) => {
 		}, 2000);
 	} else {
 		trackingButton.forEach((image) => image.style.display = 'block');
-		let frame = parseInt(start) + 10;
+		let frame = parseInt(start) + frames;
 		tracking.src = `../${frame}.jpg`;
 		const interval = setInterval(() => {
 			const finishTrackingDisplay = () => {
 				clearInterval(interval);
 				tracking.src = '../graph.jpg';
 			};
-			tracking.src = `../${frame += 10}.jpg`;
+			tracking.src = `../${frame += frames}.jpg`;
 			tracking.onerror = () => {
-				tracking.src = `../${frame -= 10}.jpg`;
+				tracking.src = `../${frame -= frames}.jpg`;
 				finishTrackingDisplay();
 			};
-			if (end && frame > end - 20) finishTrackingDisplay();
+			if (end && frame > end - frames) finishTrackingDisplay();
 		}, 500);
 	}
 });

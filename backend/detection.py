@@ -7,7 +7,7 @@ from parser import Parser
 import itertools
 import cv2
 
-def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
+def candidate_small_objects_detection(parser: Parser, frames: int = 1) -> list[np.ndarray]:
 	'''
 	Input: for each frame index n from 1 to N-1, this step takes as input the frames at index n-1, n and n+1
 	Output: for each frame index n from 1 to N-1, this step outputs a binary image representing candidate small objects
@@ -16,10 +16,10 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 	# Read in relevant frames using the data loader 
 	start, end = parser.get_frame_range()
 	output = []
-	for frame in range(start + 1, end - 1, 1):
-		frame_behind = parser.load_frame(frame - 1)
+	for frame in range(start + frames, end - frames, frames):
+		frame_behind = parser.load_frame(frame - frames)
 		frame_center = parser.load_frame(frame)
-		frame_front = parser.load_frame(frame + 1)
+		frame_front = parser.load_frame(frame + frames)
 
 		#Convert from BGR to Greyscale
 		gray_behind = cv2.cvtColor(frame_behind, cv2.COLOR_BGR2GRAY)

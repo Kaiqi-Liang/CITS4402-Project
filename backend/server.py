@@ -16,13 +16,14 @@ CORS(APP)
 def calibration():
 	data = request.get_json()
 	folder = data['folder']
+	frames = int(data['frames'])
 	try:
 		frame_range = int(data['start']), int(data['end'])
 	except ValueError:
 		frame_range = None
 	try:
 		parser = Parser(folder, '{:06}.jpg', frame_range)
-		frameBinary = candidate_small_objects_detection(parser)
+		frameBinary = candidate_small_objects_detection(parser, frames)
 		frameBinary = region_growing(frameBinary)
 		thresholds_calibration(parser, frameBinary)
 	except:
@@ -35,6 +36,7 @@ def calibration():
 def start_tracking():
 	data = request.get_json()
 	folder = data['folder']
+	frames = int(data['frames'])
 	areaTh = float(data['areaUpperTh']), float(data['areaLowerTh'])
 	extentTh = float(data['extentUpperTh']), float(data['extentLowerTh'])
 	majorAxisTh = float(data['majorAxisUpperTh']), float(data['majorAxisLowerTh'])
@@ -45,7 +47,7 @@ def start_tracking():
 		frame_range = None
 	try:
 		parser = Parser(folder, '{:06}.jpg', frame_range)
-		frameBinary = candidate_small_objects_detection(parser)
+		frameBinary = candidate_small_objects_detection(parser, frames)
 		frameBinary = region_growing(frameBinary)
 		output = candidate_match_discrimination(frameBinary, areaTh, extentTh, majorAxisTh, eccentricityTh)
 	except:
