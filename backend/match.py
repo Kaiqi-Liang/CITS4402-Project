@@ -198,11 +198,11 @@ def accuracy(pred_res: list[np.ndarray], gt_res: list[np.ndarray]):
 			break
 		print(pred_res)
 		print(gt_res)
-	# calculate precision and recall
+	# calculate precision, recall, and F1
 	precision = true_positive / (true_positive + false_positive)
 	print(precision)
 	recall = true_positive / (true_positive + false_negative)		
 	print(recall)
 	F1 = 2 * ((precision*recall)/(precision+recall))
 	print(F1)
-	return pred_res	
+	return pred_res1
