@@ -1,5 +1,5 @@
 '''
-Candidate small object detection: Motion-Based Detection Using Local Noise Modelling Algorithm
+Candidate Small Object Detection: Motion-Based Detection Using Local Noise Modelling Algorithm
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,18 +12,21 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 	Input: for each frame index n from 1 to N-1, this step takes as input the frames at index n-1, n and n+1
 	Output: for each frame index n from 1 to N-1, this step outputs a binary image representing candidate small objects
 	'''
+
+	# Read in relevant frames using the data loader 
 	start, end = parser.get_frame_range()
 	output = []
-	for frame in range(start + 10, end - 10, 10):
-		frame_behind = parser.load_frame(frame - 10)
+	for frame in range(start + 1, end - 1, 1):
+		frame_behind = parser.load_frame(frame - 1)
 		frame_center = parser.load_frame(frame)
-		frame_front = parser.load_frame(frame + 10)
+		frame_front = parser.load_frame(frame + 1)
 
 		#Convert from BGR to Greyscale
 		gray_behind = cv2.cvtColor(frame_behind, cv2.COLOR_BGR2GRAY)
 		gray_center = cv2.cvtColor(frame_center, cv2.COLOR_BGR2GRAY)
 		gray_front = cv2.cvtColor(frame_front, cv2.COLOR_BGR2GRAY)
 
+		# Split into 30 x 30 regions 
 		binary_rows = []
 		for i in range(len(gray_behind) // 30 + 1):
 			binary_cols = []
@@ -48,12 +51,13 @@ def candidate_small_objects_detection(parser: Parser) -> list[np.ndarray]:
 
 			binary_rows.append(binary_cols)
 
-		# merge the 30x30 split images back into 1 binary image
+		# Merge the 30x30 regions back into 1 binary image
 		binary_image = np.concatenate([[list(itertools.chain(*col)) for col in zip(*row)] for row in binary_rows])
 
-		# for each frame append the binary image, the center gray image and the frame number
+		# For each frame append the frame itself, grayscale version, binary version and frame number 
 		output.append((frame_center, gray_center, binary_image, frame))
 
+	# Plot an example of small object detection - for frame one plot its binary image 
 	plt.title('candidate small object detection')
 	plt.imshow(output[0][2], 'gray')
 	plt.savefig('candidate_detection.jpg')

@@ -1,3 +1,6 @@
+'''
+Candidate Match Discrimination: to clean up candidate moving objects and remove incorrect matches caused by imaging noise or small motion of the satellite 
+'''
 from parser import Parser
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -7,11 +10,21 @@ import skimage
 import cv2
 
 def region_growing(frames):
+	'''
+	Input: for each frame index n from 1 to N-1, this step takes as input a binary image representing the candidate small objects.
+	Output: for each frame index n from 1 to N-1, this step outputs a binary image with candidate small object areas grown based on a 11x11 search window 
+	'''
+
+	# loop through the frames 
 	for _, gray_image, binary_image, _ in frames:
-		# label connected regions in binary image
+
+		# identify and label connected regions in binary image
 		labelled_image = skimage.measure.label(binary_image)
 		clusters = skimage.measure.regionprops(labelled_image)
+
+		#loop through the clusters identified in the binary image 
 		for cluster in clusters:
+
 			# centroid of cluster 
 			row, col = cluster.centroid
 			row = round(row)
@@ -21,20 +34,20 @@ def region_growing(frames):
 			binary_window = binary_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)]
 			gray_window = gray_image[max(row - 5, 0): min(row + 6, 1024), max(col - 5, 0): min(col + 6, 1024)]
 
+			# binary mask applied so only 'candidate pixels' are includes in the search window 
 			gray_binary = gray_window[binary_window]
 
-			# the objects being detected are quite small, so we set a higher thresholds that any regions that are smaller than 2 pixels are ruled out
-			if len(gray_binary) <= 2:
+			# ignore any candidate areas with pixels less than 3. Two pixels is not sufficent to represent a car and is much more likely to be noise. Standard deviation based on one or two pixels is illogical.
+			if len(gray_binary) < 3:
 				continue
 
-			# find the pixel mean of the window
+			# pixel mean of the window
 			window_mean = np.average(gray_binary)
-			# find standard deviation of the window
+			# pixel standard deviation of the window
 			window_std = np.std(gray_binary)
 
-			# get the upper quantile limit of candidate cluster
+			# upper and lower quantile limit of candidate cluster based on fitting a normal distribution 
 			upper_th = min(sp.stats.norm.ppf(0.995, loc=window_mean, scale=window_std), 255)
-			# get the lower quantile limit of candidate cluster
 			lower_th = sp.stats.norm.ppf(0.005, loc=window_mean, scale=window_std)			
 
 			# mark the pixels within the quantile interval as being part of candidate cluster in object
@@ -50,6 +63,10 @@ def region_growing(frames):
 	return frames
 
 def get_candidate_small_objects(frames):
+	'''
+	Input: for each frame index n from 1 to N-1, this step takes as input a grown binary image, i.e. the output of region_growing()
+	Output: for each frame index n from 1 to N-1, this step outputs a binary image with candidate small object areas grown based on a 11x11 search window 
+	'''
 	output = []
 	for _, _, binary_image, _ in frames:
 		candidate_small_objects = [] #candidate small objects in each frame
@@ -92,6 +109,7 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 		plt.imshow(image)
 		plt.savefig(f'{frame}.jpg')
 		output.append(centroids)
+
 	plt.figure()
 	plt.xlabel('Frame')
 	plt.ylabel('Number of moving objects detected')
@@ -99,6 +117,7 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 	plt.savefig('graph.jpg')
 	return output
 
+# Threshold Calibration
 def thresholds_calibration(parser: Parser, frames):
 	candidate_small_objects = get_candidate_small_objects(frames)
 	matches = []
@@ -126,29 +145,35 @@ def thresholds_calibration(parser: Parser, frames):
 		plt.savefig(f'{column}.jpg')
 
 def bb_intersection_over_union(box_pred: list[int], box_gt: list[int]):
-	# determine x-y coords of the intersection rectangle 
+	'''
+	Input: list of bounding box coordinates of the predicted candidate cluster and the ground truth candidate cluster. List should be in this order = [min row, min col, max row, max col]
+	Output: intersection of union metric, representing the quality of matching between the ground truth regions and predicted regions. Any IOU greater tham 0.3 is considered matching 
+	'''
+
+	# determine x-y coords of the intersection 
 	xA = max(box_pred[0], box_gt[0]) # min row 
 	yA = max(box_pred[1], box_gt[1]) # min col
 	xB = min(box_pred[2], box_gt[2]) # max row
 	yB = min(box_pred[3], box_gt[3]) # max col 
 
-	# compute the area of intersection rectangle
+	# compute the area of intersection 
 	interArea = abs(max((xB - xA, 0)) * max((yB - yA), 0))
 	if interArea == 0:
 		return 0
 
- 	# compute the area of both the prediction and ground-truth
-    # rectangles
+ 	# compute the area of both the prediction and ground-truth bounding boxes
 	box_predArea = abs((box_pred[2] - box_pred[0]) * (box_pred[3] - box_pred[1]))	
 	box_gtArea = abs((box_gt[2] - box_gt[0]) * (box_gt[3] - box_gt[1]))
 	
-    # compute the intersection over union by taking the intersection
-    # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
+    # compute the intersection over union by taking the intersection area and dividing it by the sum of prediction + ground-truth areas 
 	return interArea / float(box_predArea + box_gtArea - interArea)
 
 # calculate measure of quality of predicted candidate clusters
 def accuracy(pred_res: list[np.ndarray], gt_res: list[np.ndarray]):
+	'''
+	Input: list of bounding box coordinates of the predicted candidate cluster and the ground truth candidate cluster. List should be in this order = [min row, min col, max row, max col]
+	Output: intersection of union metric, representing the quality of matching between the ground truth regions and predicted regions. Any IOU greater tham 0.3 is considered matching 
+	'''
 	pred_res1 = []
 	gt_res1 = []
 	true_positive = 0

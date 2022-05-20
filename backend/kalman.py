@@ -1,29 +1,65 @@
 import numpy as np
 import scipy as sp
+import cv2
 
-def kalman():
-    pass
+def kalman(hypothesis):
+    #initialize tracks on first frame 
+    initializedTracks = init_tracks(hypothesis)
+    frame_num =  1
 
-def init_tracks(frameCandidateClusters):
+    print(len(hypothesis))
+    kalmanOutput = []
+    kalmanOutput.append(initializedTracks)
+    while frame_num < len(hypothesis):
+        #currently looping over 0 and 1 
+        #loop over the frames, excluding the last
+
+        predictedTracks = predict_tracks(initializedTracks)
+        matchedTracks = track_association(predictedTracks, hypothesis[frame_num])
+        updatedTracks = updated_tracks(matchedTracks)
+        kalmanOutput.append(updatedTracks)
+
+        #reassigned initializedTracks to updatedTracks to pass onwards 
+        initializedTracks = updatedTracks
+        frame_num += 1
+
+    for i, frame in enumerate(kalmanOutput):
+        for cluster in frame:
+
+            x_centroid = cluster[1][0,0]
+            y_centroid = cluster[1][1,0]
+            
+            # cv2.rectangle(hypothesis[i], (x_centroid - 5, y_centroid - 5), (x_centroid + 5, y_centroid + 5), (255, 0, 0), 2)
+
+    # print(len(kalmanOutput))
+    # print(len(kalmanOutput[0]))
+    # # print(kalmanOutput[1])
+    # # print(kalmanOutput[2])
+
+    return
+
+
+def init_tracks(hypothesis):
     '''
 	Input: for each frame index n from 1 to N-1, this step takes as input a list of clusters, each cluster containing centroid and bounding box information
 	Output: for each frame index n from 1 to N-1, this step outputs initalized cluster information containig an initialized state vector and track ID. This will be passed into 'predict' 
 	'''
     #initialise tracks using the first frame 
     max_ID = 0
-    initializedtracks = []
-    for cluster in frameCandidateClusters[0]:
+    initializedTracks = []
+    for cluster in hypothesis[0]:
+
         track_ID = max_ID
-        state = np.array([cluster[0], cluster[1], 0, 0, 0, 0])
+        state = np.matrix([cluster[0], cluster[1], 0, 0, 0, 0]).T
         cov = np.diag([1] * 6)
         max_ID += 1
-        initializedtracks.append((track_ID, state, cov))
+        initializedTracks.append((track_ID, state, cov))
 
-        #frame is all of the clusters in that frame 
-        # tracks is initalized tracks for all the clusters in that frame 
-    return initializedtracks
+    # print(initializedTracks)    
 
-def predict(initializedtracks):
+    return initializedTracks
+
+def predict_tracks(initializedTracks):
     '''
 	Input: for each frame index n from 1 to N-1, this step takes as input tuple of track ID and *****initialized***** state vector for each candidate cluster 
 	Output: for each frame index n from 1 to N-1, this step outputs tuple of track ID and *****predicted***** state vector for each candidate cluster 
@@ -42,16 +78,16 @@ def predict(initializedtracks):
 
     predicted_tracks = []
 
-    for track in initializedtracks:
+    for track in initializedTracks:
         track_ID, current_state, current_cov = track
-        predicted_state = np.matmul(F, current_state.T)
+        predicted_state = np.matmul(F, current_state)
         predicted_cov = np.matmul(F, np.matmul(current_cov, F.T)) + Q
         predicted_tracks.append((track_ID, predicted_state, predicted_cov))
 
     return predicted_tracks
 
 
-def track_association(predicted_tracks, frameCandidateClusters):
+def track_association(predicted_tracks, hypothesis):
     '''
     To be run after the predicted step. Goal: to match each track to the most plausible hypotheses 
 	Input: for each frame index n from 1 to N-1, this step takes as input tuple of track ID and *****initialized***** state vector for each candidate cluster 
@@ -59,10 +95,10 @@ def track_association(predicted_tracks, frameCandidateClusters):
 	'''
 
     predicted_clusters = predicted_tracks
-    measured_clusters = frameCandidateClusters[1]
+    measured_clusters = hypothesis
     length = len(predicted_clusters) + len(measured_clusters)
 
-    predicted_centroids = [(predicted_state[0, 0], predicted_state[0, 1]) for _, predicted_state, _ in predicted_clusters]
+    predicted_centroids = [(predicted_state[0, 0], predicted_state[1, 0]) for _, predicted_state, _ in predicted_clusters]
     measured_centroids = measured_clusters
 
     cost_matrix = np.zeros((length, length))
@@ -75,30 +111,34 @@ def track_association(predicted_tracks, frameCandidateClusters):
  
     predicted_idx, measured_idx = sp.optimize.linear_sum_assignment(cost_matrix)
 
+    # print(predicted_idx, measured_idx)
+    # return
+
     #Unassigned tracks occur when predicted values are assigned to pseudo hypothesis 
     #if there are n predicted values and m hypothesis 
     #then unassigned tracks occur when predicted[:n] is assigned to hypothesis[m:]
     matched_pairs =[]
-    matched_predictions = []
     unassigned_tracks =[]
     unassigned_hypothesis = []
     for idx in range(length):
         proposed_pair = (predicted_idx[idx],measured_idx[idx])
 
-        if proposed_pair[0] < len(predicted_clusters) and proposed_pair[1] < len(measured_clusters):
-            # matched_pairs.append((predicted_centroids[proposed_pair[0]], measured_centroids[proposed_pair[1]]))
-            
+        if proposed_pair[0] < len(predicted_clusters) and proposed_pair[1] < len(measured_clusters):            
             matched_pairs.append((predicted_clusters[proposed_pair[0]],measured_centroids[proposed_pair[1]]))
-            matched_predictions.append((predicted_clusters[proposed_pair[0]]))
+            print("track_ID that was matched forward",predicted_clusters[proposed_pair[0]][0])
 
         elif proposed_pair[0] < len(predicted_clusters) and proposed_pair[1] >= len(measured_clusters):
             #matching predicted tracks to pseudo hypothesis
             #i.e. unassigned tracks
+            print("track_ID that was unassigned",predicted_clusters[proposed_pair[0]][0] )
+
             unassigned_tracks.append(predicted_centroids[proposed_pair[0]])
             
         elif proposed_pair[0] >= len(predicted_clusters) and proposed_pair[1] < len(measured_clusters):
             #matching pseudo tracks to real hypothesis 
             #unassigned hypothesis 
+            print("hypothesis that was unassigned",proposed_pair[1] )
+
             unassigned_hypothesis.append(measured_centroids[proposed_pair[1]])
             
         elif proposed_pair[0] >= len(predicted_clusters) and  proposed_pair[1] >= len(measured_clusters):
@@ -111,7 +151,7 @@ def track_association(predicted_tracks, frameCandidateClusters):
 
     return matched_pairs 
 
-def updateKalman(matched_pairs):
+def updated_tracks(matched_pairs):
     '''
     To be run after the tracks and hypothesis have been associated with one another. Updates the state estimate of the Kalman filter. 
 	Input: for each frame index n from 1 to N-1, this step takes as input tuple of track ID and *****initialized***** state vector for each candidate cluster 
@@ -132,19 +172,26 @@ def updateKalman(matched_pairs):
 
     updated_tracks = []
     for i, track in enumerate(predicted_tracks):
-        predicted_state = track[1].T
+        track_ID = track[0]
+        predicted_state = track[1]
         predicted_cov = track[2]
         measured_centroid = np.matrix(measured_centroids[i]).T
- 
+
         innovation = measured_centroid - np.matmul(H,predicted_state)
         innovation_cov = np.matmul(np.matmul(H, predicted_cov),H.T) + R
         kalman_gain = np.matmul(np.matmul(predicted_cov, H.T), np.linalg.inv(innovation_cov))
         updated_state = predicted_state + np.matmul(kalman_gain,innovation)
         updated_cov = np.matmul((np.identity(6) - np.matmul(kalman_gain,H)),predicted_cov)
 
-        updated_tracks.append((updated_state, updated_cov))
-
+        updated_tracks.append((track_ID, updated_state, updated_cov))
+        
     return updated_tracks
+
+
+
+
+
+
 
 # for unassigned track ID's, i.e. gt clusters with no match in hypothesis     
 def nearest_search(unassigned_tracks, frame, previous_frame):
