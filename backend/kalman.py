@@ -208,11 +208,6 @@ def updated_tracks(matched_pairs):
     return updated_tracks
 
 
-
-
-
-
-
 # for unassigned track ID's, i.e. gt clusters with no match in hypothesis     
 def nearest_search(unassigned_tracks, frame, previous_frame):
     res = []
