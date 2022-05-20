@@ -1,8 +1,11 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import scipy as sp
 import cv2
 
 def kalman(hypothesis):
+    #the length of hypothesis is the number of frames. Each list inside hypothesis represents one frame's information including the image and the centroid 
+
     #initialize tracks on first frame 
     initializedTracks = init_tracks(hypothesis)
     frame_num =  1
@@ -15,7 +18,7 @@ def kalman(hypothesis):
         #loop over the frames, excluding the last
 
         predictedTracks = predict_tracks(initializedTracks)
-        matchedTracks = track_association(predictedTracks, hypothesis[frame_num])
+        matchedTracks = track_association(predictedTracks, hypothesis[frame_num][1])
         updatedTracks = updated_tracks(matchedTracks)
         kalmanOutput.append(updatedTracks)
 
@@ -26,15 +29,32 @@ def kalman(hypothesis):
     for i, frame in enumerate(kalmanOutput):
         for cluster in frame:
 
-            x_centroid = cluster[1][0,0]
-            y_centroid = cluster[1][1,0]
-            
-            # cv2.rectangle(hypothesis[i], (x_centroid - 5, y_centroid - 5), (x_centroid + 5, y_centroid + 5), (255, 0, 0), 2)
+            x_centroid = round(cluster[1][0,0])
+            y_centroid = round(cluster[1][1,0])
 
-    # print(len(kalmanOutput))
-    # print(len(kalmanOutput[0]))
-    # # print(kalmanOutput[1])
-    # # print(kalmanOutput[2])
+            cv2.rectangle(hypothesis[i][0], (x_centroid - 5, y_centroid - 5), (x_centroid + 5, y_centroid + 5), (255, 0, 0), 2)
+    
+    plt.subplot(1,3,1)
+    plt.imshow(hypothesis[0][0])
+    plt.title("Frame 1")
+
+    plt.subplot(1,3,2)
+    plt.imshow(hypothesis[1][0])
+    plt.title("Frame 2")
+
+    plt.subplot(1,3,3)
+    plt.imshow(hypothesis[2][0])
+    plt.title("Frame 3")
+    plt.show()
+
+    video = cv2.VideoWriter('video.avi', 0, 1, (1025,1025))
+    for frame in hypothesis:
+        image = frame[0]
+        video.write(image)
+    
+    cv2.destroyAllWindows()
+    video.release()
+
 
     return
 
@@ -44,10 +64,10 @@ def init_tracks(hypothesis):
 	Input: for each frame index n from 1 to N-1, this step takes as input a list of clusters, each cluster containing centroid and bounding box information
 	Output: for each frame index n from 1 to N-1, this step outputs initalized cluster information containig an initialized state vector and track ID. This will be passed into 'predict' 
 	'''
-    #initialise tracks using the first frame 
+    #initialise tracks using the first frame. hypothesis[0] gives you the first frame. hypothesis[0][1] gives you the first frames clusters 
     max_ID = 0
     initializedTracks = []
-    for cluster in hypothesis[0]:
+    for cluster in hypothesis[0][1]:
 
         track_ID = max_ID
         state = np.matrix([cluster[0], cluster[1], 0, 0, 0, 0]).T

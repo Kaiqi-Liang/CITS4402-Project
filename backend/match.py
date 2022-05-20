@@ -105,16 +105,17 @@ def candidate_match_discrimination(frames: list[np.ndarray], areaTh: tuple[float
 				centroids.append(centroid)
 				min_row, min_col, max_row, max_col = bbox
 				cv2.rectangle(image, (min_row, min_col), (max_row, max_col), (255, 0, 0), 2)
-		plt.title(f'frame {frame}')
-		plt.imshow(image)
-		plt.savefig(f'{frame}.jpg')
-		output.append(centroids)
+		# plt.title(f'frame {frame}')
+		# plt.imshow(image)
+		# plt.savefig(f'{frame}.jpg')
+		output.append([image, centroids])
 
-	plt.figure()
-	plt.xlabel('Frame')
-	plt.ylabel('Number of moving objects detected')
-	plt.plot([frame[-1] for frame in frames], [len(frame) for frame in output])
-	plt.savefig('graph.jpg')
+	# plt.figure()
+	# plt.xlabel('Frame')
+	# plt.ylabel('Number of moving objects detected')
+	# plt.plot([frame[-1] for frame in frames], [len(frame) for frame in output])
+	# plt.savefig('graph.jpg')
+
 	return output
 
 # Threshold Calibration

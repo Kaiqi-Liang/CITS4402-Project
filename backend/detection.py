@@ -57,7 +57,7 @@ def candidate_small_objects_detection(parser: Parser, frames: int = 1) -> list[n
 		# For each frame append the frame itself, grayscale version, binary version and frame number 
 		output.append((frame_center, gray_center, binary_image, frame))
 
-	# Plot an example of small object detection - for frame one plot its binary image 
+	# Plot an example of small object detection - for frame one plot its binary image
 	plt.title('candidate small object detection')
 	plt.imshow(output[0][2], 'gray')
 	plt.savefig('candidate_detection.jpg')
