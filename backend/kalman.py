@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sp
+import cv2
 
 def kalman():
     pass
@@ -149,18 +150,31 @@ def updateKalman(matched_pairs):
 # for unassigned track ID's, i.e. gt clusters with no match in hypothesis     
 def nearest_search(unassigned_tracks, frame, previous_frame):
     res = []
+    # iterate through all unassigned tracks
     for gt_centroid in unassigned_tracks:
+        # get grey image of previous frame
         _, grey_image2, _ = previous_frame
+        # get grey image of current frame
         _, grey_image1, _ = frame
+        # get centroid coordinates of unassigned track in current frame grey image
         row, column = gt_centroid
+        # do template matching between unassigned track in current frame grey image with an area around unassigned track(im_area) in the previous frame grey image
+        # get box area coordinates of unassigned track in current frame grey image which is the template for template matching
         template = grey_image1[row - 2 : row + 2, column - 2 : column + 2]
+        # get box area coordinates of image area to search in the previous frame grey image to search for the template
         im_area = grey_image2[row - 3 : row + 3, column - 3 : column + 3]
         h, w = template.shape[::]
         res = cv2.matchTemplate(im_area, template, cv2.TM_SQDIFF) 
-        if res < 300000:
-            # min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)   
-            # top_left = min_loc
-            # bottom_right = (top_left[0] + w, top_left[1 + h]) 
-            hypothesis_centroid = gt_centroid
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res) 
+        # min_val is calculated assuming a 70% template match to confirm the template was found in the image area
+        # min_val = (4 x 4 x 255**2) * 0.30 = approx. 300000 , the lower min_val is the better is the match 
+        # if the template match was found in the image area of the previous frame, then get the hypothesis_centroid coordinates which
+        # means the object did not move and the hypothesis object was not picked up in the current frame
+        if min_val < 300000:
+            # get top left coordinates of hypothesis object
+            top_left = min_loc
+            # calculate the hypothesis_centroid coordinates
+            hypothesis_centroid = (top_left[0] + w/2, top_left[1] + h/2) 
+        # append the hypothesis_centroid coordinates with the unassigned track coordinates which are matching objects
         res.append((hypothesis_centroid, gt_centroid))
     return res
