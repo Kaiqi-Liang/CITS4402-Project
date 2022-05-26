@@ -12,8 +12,7 @@ def kalman(hypothesis, non_assignment_cost = None):
 	initializedTracks = init_tracks(hypothesis)
 	frame_num = 1
 
-	kalmanOutput = []
-	kalmanOutput.append(initializedTracks)
+	kalmanOutput = [initializedTracks]
 	while frame_num < len(hypothesis):
 		# Loop over the frames, excluding the last
 		predictedTracks = predict_tracks(initializedTracks)
@@ -118,8 +117,8 @@ def track_association(predicted_tracks, hypothesis, non_assignment_cost):
 	# Optimise the assignment of tracks and hypothesis
 	predicted_idx, measured_idx = sp.optimize.linear_sum_assignment(cost_matrix)
 
-	matched_pairs =[]
-	unassigned_tracks =[]
+	matched_pairs = []
+	unassigned_tracks = []
 	unassigned_hypothesis = []
 
 	# Loop over every proposed matching pair and assign the pair as every a 'matched_pair', 'unassigned_track', or 'unassigned_hypothesis'
